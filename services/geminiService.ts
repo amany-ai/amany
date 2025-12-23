@@ -2,11 +2,30 @@
 import { GoogleGenAI, Type, FunctionDeclaration } from "@google/genai";
 import { Project, ResourceAllocation } from "../types";
 
+const extractJson = (text: string | undefined) => {
+  if (!text) return null;
+  try {
+    // Attempt direct parse first
+    return JSON.parse(text);
+  } catch (e) {
+    // If it fails, try to find a JSON block in markdown
+    const match = text.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+    if (match) {
+      try {
+        return JSON.parse(match[0]);
+      } catch (innerE) {
+        console.error("JSON Extraction failed", innerE);
+        return null;
+      }
+    }
+    return null;
+  }
+};
+
 export const generateWeeklyResourceSummary = async (allocations: ResourceAllocation[]) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const prompt = `Act as an AI Resource Manager for a Laravel 11 & Self-Hosted MongoDB based production line. 
+  const prompt = `Act as an AI Resource Manager for a React & Native Mobile production line. 
   Summarize the following weekly resource plan for a Slack update.
-  You MUST provide the summary in both English AND Arabic.
   
   Resources:
   ${JSON.stringify(allocations)}
@@ -20,34 +39,31 @@ export const generateWeeklyResourceSummary = async (allocations: ResourceAllocat
   - End Date: [Value]
   - Comment: [Value if found, otherwise "None"]
   
-  Ensure to mention the local Laravel/NoSQL stack health in both languages.
-  Use clean Slack-ready markdown. Add a brief executive summary at the top in both languages.`;
+  Use clean Slack-ready markdown. Add a brief executive summary at the top.`;
 
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: prompt,
     });
-    return response.text;
+    return response.text || "Unable to generate AI summary at this time.";
   } catch (error) {
     console.error("Resource Summary Error:", error);
     return "Unable to generate AI summary at this time.";
   }
 };
 
-export const generateApiBlueprint = async (requirement: string) => {
+export const generateFrontendBlueprint = async (requirement: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const prompt = `Act as a Senior Laravel & NoSQL Architect. Convert this requirement into a production-ready Laravel 11 & Internal MongoDB blueprint.
-  The input might be in English or Arabic. Handle both gracefully.
+  const prompt = `Act as a Senior Lead Frontend Architect. Convert this requirement into a production-ready React component structure and SwiftUI stubs.
   Requirement: ${requirement}.
   
   Output should include:
-  1. Laravel REST Controllers using Moloquent (Laravel-MongoDB) & API Routes optimized for local hosting.
-  2. MongoDB Document Schemas (BSON/JSON structure with local performance indexes).
-  3. Swift 6.0 Model stubs for iOS Native integration.
+  1. React/Tailwind component hierarchy.
+  2. State management logic (React Context/Redux).
+  3. Swift 6.0 SwiftUI view stubs for Native integration.
   
-  Focus on low-latency internal network performance for native mobile apps.
-  Return as a clean JSON object. Descriptions within the JSON can be in Arabic if the input was Arabic.`;
+  Return as a clean JSON object.`;
 
   try {
     const response = await ai.models.generateContent({
@@ -58,236 +74,68 @@ export const generateApiBlueprint = async (requirement: string) => {
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            endpoints: {
+            components: {
               type: Type.ARRAY,
               items: {
                 type: Type.OBJECT,
                 properties: {
-                  method: { type: Type.STRING },
-                  path: { type: Type.STRING },
-                  description: { type: Type.STRING }
+                  name: { type: Type.STRING },
+                  description: { type: Type.STRING },
+                  props: { type: Type.ARRAY, items: { type: Type.STRING } }
                 }
               }
             },
-            databaseSchema: { type: Type.STRING, description: "Local MongoDB Schema" },
-            swiftModels: { type: Type.STRING }
+            tailwindStubs: { type: Type.STRING },
+            swiftUIView: { type: Type.STRING }
           }
         }
       }
     });
-    return response.text ? JSON.parse(response.text) : null;
+    return extractJson(response.text);
   } catch (error) {
-    console.error("API Blueprint Error:", error);
+    console.error("Frontend Blueprint Error:", error);
     return null;
   }
 };
-
-export const analyzeFigmaDesign = async (imageData?: string, figmaLink?: string) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  
-  let contents: any[] = [];
-  if (imageData) {
-    contents.push({
-      inlineData: {
-        mimeType: 'image/jpeg',
-        data: imageData.split(',')[1],
-      },
-    });
-  }
-  
-  const textPrompt = `Act as a Senior Laravel & NoSQL Architect. Analyze the provided ${imageData ? 'UI design mockup' : 'Figma link: ' + figmaLink}.
-  Detect the language of the UI. If it is Arabic, provide analysis in Arabic.
-  1. Identify all required data entities and attributes visible in the UI.
-  2. Design a Laravel 11 Controller with MongoDB Eloquent (Moloquent) to support this UI using internal node logic.
-  3. Create Swift Codable Data Models for iOS Native integration.
-  4. Define a Self-Hosted MongoDB (NoSQL) Document structure.
-  
-  Return the result in JSON format.`;
-  
-  contents.push({ text: textPrompt });
-
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
-      contents: { parts: contents },
-      config: {
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            entities: { type: Type.ARRAY, items: { type: Type.STRING } },
-            endpoints: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  method: { type: Type.STRING },
-                  path: { type: Type.STRING },
-                  description: { type: Type.STRING }
-                }
-              }
-            },
-            databaseSchema: { type: Type.STRING, description: "Internal MongoDB structure" },
-            swiftModels: { type: Type.STRING }
-          },
-          required: ["entities", "endpoints", "databaseSchema", "swiftModels"]
-        }
-      }
-    });
-    return response.text ? JSON.parse(response.text) : null;
-  } catch (error) {
-    console.error("Figma AI Error:", error);
-    return null;
-  }
-};
-
-export const estimateSalesFromBRD = async (brdContent: string) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const prompt = `Act as a Senior Project Estimator. 
-  Analyze this BRD (Could be English or Arabic): ${brdContent}.
-  Technical Stack: Laravel 11 Backend + Self-Hosted MongoDB + Native Mobile (Kotlin/Swift).
-  Provide an estimation in JSON format. Provide text-based fields in the same language as the input.`;
-
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
-      contents: prompt,
-      config: {
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            totalHours: { type: Type.NUMBER },
-            complexity: { type: Type.STRING },
-            roleBreakdown: { 
-              type: Type.ARRAY, 
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  role: { type: Type.STRING },
-                  hours: { type: Type.NUMBER }
-                },
-                required: ["role", "hours"]
-              }
-            },
-            risks: { type: Type.ARRAY, items: { type: Type.STRING } },
-            suggestedTimelineWeeks: { type: Type.NUMBER },
-            estimatedCost: { type: Type.STRING }
-          },
-          required: ["totalHours", "complexity", "roleBreakdown", "risks", "suggestedTimelineWeeks", "estimatedCost"]
-        }
-      }
-    });
-    return response.text ? JSON.parse(response.text) : null;
-  } catch (error) {
-    console.error("Estimation Error:", error);
-    return null;
-  }
-};
-
-export const orchestrateOneClickFlow = async (documentContent: string) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const prompt = `You are the PM Orchestrator. Convert this ${documentContent.length > 500 ? 'SRS' : 'BRD'} into a full A21-Txx Zoho Project Plan.
-  Document (English or Arabic): ${documentContent}
-  Generate the project plan. If the document is Arabic, ensure task titles are in Arabic.
-  Tech Stack: Laravel 11 Backend + Internal MongoDB NoSQL Database.`;
-
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: prompt,
-      config: {
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            projectName: { type: Type.STRING },
-            planSummary: { type: Type.STRING },
-            tasks: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  zohoId: { type: Type.STRING },
-                  title: { type: Type.STRING },
-                  role: { type: Type.STRING },
-                  durationDays: { type: Type.NUMBER },
-                  priority: { type: Type.STRING }
-                }
-              }
-            }
-          }
-        }
-      }
-    });
-    return response.text ? JSON.parse(response.text) : null;
-  } catch (error) {
-    console.error("Orchestration Error:", error);
-    return null;
-  }
-};
-
-export const getProjectInsights = async (project: Project) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const prompt = `Analyze this Project Status: ${JSON.stringify(project)}.
-  Provide a concise executive summary and risk assessment. 
-  If the current system language or task titles are predominantly Arabic, provide insights in Arabic. 
-  Environment: Laravel 11 + Self-Hosted MongoDB + Native Mobile.`;
-
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            statusSummary: { type: Type.STRING },
-            riskLevel: { type: Type.STRING },
-            alerts: { type: Type.ARRAY, items: { type: Type.STRING } },
-            recommendations: { type: Type.ARRAY, items: { type: Type.STRING } }
-          },
-          required: ["statusSummary", "riskLevel", "alerts", "recommendations"]
-        }
-      }
-    });
-    return response.text ? JSON.parse(response.text) : null;
-  } catch (error) {
-    return null;
-  }
-};
-
-const CONTROL_TOOLS: FunctionDeclaration[] = [
-  {
-    name: 'navigate',
-    parameters: {
-      type: Type.OBJECT,
-      properties: { tab: { type: Type.STRING } },
-      required: ['tab']
-    }
-  }
-];
 
 export const processAICommand = async (input: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const CONTROL_TOOLS: FunctionDeclaration[] = [
+    {
+      name: 'navigate',
+      description: 'Navigate to a different tab or section of the application.',
+      parameters: {
+        type: Type.OBJECT,
+        properties: { 
+          tab: { 
+            type: Type.STRING, 
+            description: 'The ID of the tab to navigate to (dashboard, tasks, frontend, system-files, vault, testcenter, notifications, users, srs, blueprint, resources, employees, policy).' 
+          } 
+        },
+        required: ['tab']
+      }
+    }
+  ];
+
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: input,
-      config: { tools: [{ functionDeclarations: CONTROL_TOOLS }] }
+      config: { 
+        tools: [{ functionDeclarations: CONTROL_TOOLS }],
+        systemInstruction: "You are the Rowaad PM-Auto assistant. Help users navigate the system. If they want to see a section, use the navigate tool."
+      }
     });
     return response.functionCalls || [];
   } catch (error) {
+    console.error("AI Command Error:", error);
     return [];
   }
 };
 
 export const analyzeSRS = async (content: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const prompt = `You are a Technical Architect specialized in Laravel 11 & Self-Hosted MongoDB. 
-  Analyze this Software Requirements Specification (SRS) for a 22-day production cycle.
-  Detect if the content is Arabic or English and respond in the matching language.
+  const prompt = `Analyze this Software Requirements Specification (SRS) for a 22-day production cycle.
   
   SRS Content:
   ${content}`;
@@ -322,7 +170,7 @@ export const analyzeSRS = async (content: string) => {
         }
       }
     });
-    return response.text ? JSON.parse(response.text) : null;
+    return extractJson(response.text);
   } catch (error) {
     console.error("SRS Analysis Error:", error);
     return null;
@@ -331,9 +179,7 @@ export const analyzeSRS = async (content: string) => {
 
 export const generateTestSuite = async (srs: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const prompt = `Act as a Senior QA Automation Engineer. Generate automated tests for the following requirements (AR or EN):
-  ${srs}
-  Respond in the language of the input.`;
+  const prompt = `Act as a Senior QA Automation Engineer. Generate automated tests for: ${srs}`;
 
   try {
     const response = await ai.models.generateContent({
@@ -358,9 +204,218 @@ export const generateTestSuite = async (srs: string) => {
         }
       }
     });
-    return response.text ? JSON.parse(response.text) : [];
+    return extractJson(response.text) || [];
   } catch (error) {
     console.error("Test Generation Error:", error);
     return [];
+  }
+};
+
+export const orchestrateOneClickFlow = async (documentContent: string) => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const prompt = `Convert this SRS into a full A21 project plan for React & Native Mobile.
+  Document: ${documentContent}`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            projectName: { type: Type.STRING },
+            planSummary: { type: Type.STRING },
+            tasks: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  zohoId: { type: Type.STRING },
+                  title: { type: Type.STRING },
+                  role: { type: Type.STRING },
+                  durationDays: { type: Type.NUMBER },
+                  priority: { type: Type.STRING }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+    return extractJson(response.text);
+  } catch (error) {
+    console.error("Orchestration Error:", error);
+    return null;
+  }
+};
+
+export const estimateSalesFromBRD = async (brdContent: string) => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const prompt = `Act as a Senior Project Estimator for a React/Native stack.
+  BRD: ${brdContent}`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-pro-preview',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            totalHours: { type: Type.NUMBER },
+            complexity: { type: Type.STRING },
+            roleBreakdown: { 
+              type: Type.ARRAY, 
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  role: { type: Type.STRING },
+                  hours: { type: Type.NUMBER }
+                }
+              }
+            },
+            risks: { type: Type.ARRAY, items: { type: Type.STRING } },
+            suggestedTimelineWeeks: { type: Type.NUMBER },
+            estimatedCost: { type: Type.STRING }
+          }
+        }
+      }
+    });
+    return extractJson(response.text);
+  } catch (error) {
+    console.error("Estimation Error:", error);
+    return null;
+  }
+};
+
+export const getProjectInsights = async (project: Project) => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const prompt = `Analyze this Project Status: ${JSON.stringify(project)}.`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            statusSummary: { type: Type.STRING },
+            riskLevel: { type: Type.STRING },
+            alerts: { type: Type.ARRAY, items: { type: Type.STRING } },
+            recommendations: { type: Type.ARRAY, items: { type: Type.STRING } }
+          }
+        }
+      }
+    });
+    return extractJson(response.text);
+  } catch (error) {
+    return null;
+  }
+};
+
+// Fixed: Added missing generateApiBlueprint export for BackendDev component
+export const generateApiBlueprint = async (requirement: string) => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const prompt = `Act as a Senior Backend Architect for Laravel 11 and MongoDB.
+  Convert this requirement into a backend blueprint: ${requirement}.
+  
+  Output MUST include:
+  1. databaseSchema: A BSON/MongoDB collection schema.
+  2. endpoints: An array of objects with 'method' and 'path'.
+  
+  Return as a clean JSON object.`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-pro-preview',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            databaseSchema: { type: Type.STRING },
+            endpoints: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  method: { type: Type.STRING },
+                  path: { type: Type.STRING }
+                },
+                required: ["method", "path"]
+              }
+            }
+          },
+          required: ["databaseSchema", "endpoints"]
+        }
+      }
+    });
+    return extractJson(response.text);
+  } catch (error) {
+    console.error("API Blueprint Error:", error);
+    return null;
+  }
+};
+
+// Fixed: Added missing analyzeFigmaDesign export for BackendDev component
+export const analyzeFigmaDesign = async (figmaImage?: string, figmaLink?: string) => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  let parts: any[] = [{ text: `Act as a UI/UX and Backend Architect. Analyze this Figma design and generate a Laravel + MongoDB architecture blueprint.
+  
+  Output MUST include:
+  1. databaseSchema: A BSON/MongoDB collection schema.
+  2. endpoints: An array of objects with 'method' and 'path'.
+  
+  Return as a clean JSON object.` }];
+
+  if (figmaImage) {
+    parts.push({
+      inlineData: {
+        mimeType: 'image/png',
+        data: figmaImage.split(',')[1] || figmaImage,
+      },
+    });
+  }
+  
+  if (figmaLink) {
+    parts.push({ text: `Figma Link: ${figmaLink}` });
+  }
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-pro-preview', // High quality analysis model for design to code task
+      contents: { parts },
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            databaseSchema: { type: Type.STRING },
+            endpoints: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  method: { type: Type.STRING },
+                  path: { type: Type.STRING }
+                },
+                required: ["method", "path"]
+              }
+            }
+          },
+          required: ["databaseSchema", "endpoints"]
+        }
+      }
+    });
+    return extractJson(response.text);
+  } catch (error) {
+    console.error("Figma Sync Error:", error);
+    return null;
   }
 };

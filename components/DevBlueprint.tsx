@@ -69,7 +69,7 @@ const DevBlueprint: React.FC = () => {
       <header className="mb-10 flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-black text-slate-900 flex items-center gap-3 tracking-tighter uppercase">
-            <Cpu className="text-blue-600" size={32} /> Project Orchestrator
+            <Cpu className="text-blue-600" size={32} /> BRD Estimation
           </h2>
           <p className="text-slate-500 mt-1">Transform SRS/BRD documents, images, and links into automated production plans.</p>
         </div>

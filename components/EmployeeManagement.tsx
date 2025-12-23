@@ -21,7 +21,7 @@ const EmployeeManagement: React.FC = () => {
     setTimeout(() => {
       setIsSyncing(false);
       // Logic for syncing with Zoho/TimeDoctor would go here
-      alert("Employee list successfully synchronized with Zoho Projects & Time Doctor.");
+      alert("Team members successfully synchronized with Zoho Projects & Time Doctor.");
     }, 2000);
   };
 
@@ -51,7 +51,7 @@ const EmployeeManagement: React.FC = () => {
   };
 
   const deleteEmployee = (id: string) => {
-    if (window.confirm("Are you sure you want to remove this employee from the bridge?")) {
+    if (window.confirm("Are you sure you want to remove this team member from the bridge?")) {
       setEmployees(employees.filter(emp => emp.id !== id));
     }
   };
@@ -61,7 +61,7 @@ const EmployeeManagement: React.FC = () => {
       <header className="mb-8 flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-black text-slate-900 flex items-center gap-3">
-            <Users className="text-blue-600" size={32} /> Employee Directory
+            <Users className="text-blue-600" size={32} /> Team Members
           </h2>
           <p className="text-slate-500 mt-1">Manage team identities and system synchronization across Zoho/Time Doctor.</p>
         </div>
@@ -78,7 +78,7 @@ const EmployeeManagement: React.FC = () => {
             onClick={() => { setEditingEmployee(null); setIsModalOpen(true); }}
             className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95"
           >
-            <Plus size={18} /> Add Employee
+            <Plus size={18} /> Add Member
           </button>
         </div>
       </header>
@@ -190,7 +190,7 @@ const EmployeeManagement: React.FC = () => {
             <div className="flex justify-between items-center mb-6 border-b pb-4">
               <h3 className="text-xl font-black text-slate-900 flex items-center gap-2 uppercase tracking-tighter">
                 {editingEmployee ? <Edit2 className="text-blue-600" /> : <Plus className="text-blue-600" />}
-                {editingEmployee ? 'Update Employee Record' : 'Register New Team Member'}
+                {editingEmployee ? 'Update Member Record' : 'Register New Member'}
               </h3>
               <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-900"><X size={24} /></button>
             </div>
@@ -242,7 +242,7 @@ const EmployeeManagement: React.FC = () => {
               <div className="col-span-2 flex gap-3 mt-4">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-200 transition-all">Cancel</button>
                 <button type="submit" className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20">
-                  {editingEmployee ? 'Update Directory' : 'Register Employee'}
+                  {editingEmployee ? 'Update Member' : 'Register Member'}
                 </button>
               </div>
             </form>

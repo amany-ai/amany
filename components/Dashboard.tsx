@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { Project, Language } from '../types';
+import { Project, Language, GitLabUpdate } from '../types';
 import { getProjectInsights } from '../services/geminiService';
 import ActivitySentinel from './ActivitySentinel';
-import { TrendingUp, AlertTriangle, GitPullRequest, Activity, Zap, Server, Database, Smartphone } from 'lucide-react';
+import { TrendingUp, AlertTriangle, GitPullRequest, Activity, Zap, Server, Database, Smartphone, GitBranch, History, Terminal } from 'lucide-react';
 import { TRANSLATIONS } from '../constants';
 
 interface DashboardProps {
@@ -14,6 +14,7 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ project, language }) => {
   const [insights, setInsights] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const t = TRANSLATIONS[language];
 
   useEffect(() => {
@@ -25,6 +26,15 @@ const Dashboard: React.FC<DashboardProps> = ({ project, language }) => {
     };
     fetchInsights();
   }, [project]);
+
+  // Simulate periodic fetching of git logs
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsSyncing(true);
+      setTimeout(() => setIsSyncing(false), 2000);
+    }, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   const progress = (project.currentDay / project.totalDays) * 100;
 
@@ -103,6 +113,64 @@ const Dashboard: React.FC<DashboardProps> = ({ project, language }) => {
 
         <div className="lg:col-span-1">
           <ActivitySentinel />
+        </div>
+      </div>
+
+      {/* RECENT GIT COMMIT LOGS SECTION */}
+      <div className="bg-white border-2 border-slate-100 rounded-[40px] p-8 shadow-sm mb-8 animate-in slide-in-from-bottom-4 duration-700">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h3 className="text-lg font-black text-slate-900 uppercase tracking-tighter flex items-center gap-3">
+              <GitBranch className="text-emerald-500" size={20} /> Recent Git Commit Logs
+            </h3>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Direct stream from internal GitLab repositories</p>
+          </div>
+          <div className="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100">
+            <div className={`w-2 h-2 rounded-full ${isSyncing ? 'bg-emerald-500 animate-ping' : 'bg-slate-300'}`}></div>
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+              {isSyncing ? 'Syncing...' : 'Nodes Connected'}
+            </span>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          {project.gitUpdates.map((log: GitLabUpdate) => (
+            <div key={log.id} className="bg-slate-50/50 hover:bg-white border-2 border-transparent hover:border-emerald-100 p-6 rounded-[32px] transition-all group shadow-sm hover:shadow-xl hover:shadow-emerald-500/5">
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-black flex items-center justify-center text-emerald-400 font-black text-xs shadow-lg group-hover:scale-110 transition-transform">
+                    {log.author.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="text-xs font-black text-slate-900 uppercase tracking-tight">{log.author}</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <History size={10} className="text-slate-400" />
+                      <p className="text-[9px] text-slate-400 font-bold uppercase">{log.timestamp}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mb-4">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Terminal size={10} className="text-emerald-600" />
+                  <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">{log.repo}</span>
+                </div>
+                <p className="text-sm font-bold text-slate-700 leading-relaxed line-clamp-2">
+                  {log.message}
+                </p>
+              </div>
+              <div className="flex items-center gap-4 pt-4 border-t border-slate-100">
+                <div className="flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
+                  <span className="text-[10px] font-black text-emerald-600">+{log.linesAdded}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
+                  <span className="text-[10px] font-black text-red-500">-{log.linesRemoved}</span>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

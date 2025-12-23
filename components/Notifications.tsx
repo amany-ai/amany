@@ -44,7 +44,7 @@ const Notifications: React.FC<NotificationsProps> = ({
       <header className="mb-10 flex justify-between items-center">
         <div>
           <h2 className="text-4xl font-black text-slate-900 flex items-center gap-4 tracking-tighter uppercase">
-            <Bell size={40} className="text-emerald-500" /> Notifications Hub
+            <Bell size={40} className="text-emerald-500" /> Notifications
           </h2>
           <p className="text-slate-500 mt-1 font-medium">Real-time alerts from the Rowaad Bridge ecosystem.</p>
         </div>

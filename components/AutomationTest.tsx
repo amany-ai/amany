@@ -59,7 +59,7 @@ const AutomationTest: React.FC<AutomationTestProps> = ({ project, onUpdateTests 
       <header className="mb-8 flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-black text-slate-900 flex items-center gap-3">
-            <Beaker className="text-purple-600" size={32} /> Automation QA Bridge
+            <Beaker className="text-purple-600" size={32} /> Ai Tester
           </h2>
           <p className="text-slate-500 mt-1">Native Android/iOS & Web Automation Hub integrated with A21-T33.</p>
         </div>

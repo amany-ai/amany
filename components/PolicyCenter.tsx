@@ -42,7 +42,7 @@ const PolicyCenter: React.FC = () => {
       <header className="mb-10 flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-black text-slate-900 flex items-center gap-4 tracking-tighter uppercase">
-            <ShieldCheck className="text-emerald-500" size={32} /> Compliance Node
+            <ShieldCheck className="text-emerald-500" size={32} /> Work Rules
           </h2>
           <p className="text-slate-500 mt-1 font-medium">Operational standards for the 22-day production lifecycle.</p>
         </div>

@@ -14,22 +14,40 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onAction }) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (isOpen) inputRef.current?.focus();
+    if (isOpen) {
+      inputRef.current?.focus();
+    }
   }, [isOpen]);
+
+  // Global keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setIsOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || loading) return;
 
     setLoading(true);
-    const actions = await processAICommand(input);
-    
-    if (actions.length > 0) {
-      actions.forEach(a => onAction(a.name, a.args));
-      setIsOpen(false);
-      setInput('');
+    try {
+      const actions = await processAICommand(input);
+      if (actions && actions.length > 0) {
+        actions.forEach(a => onAction(a.name, a.args));
+        setIsOpen(false);
+        setInput('');
+      }
+    } catch (err) {
+      console.error("Failed to process AI command", err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   if (!isOpen) return (
@@ -79,14 +97,18 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onAction }) => {
           </div>
           
           <div className="mt-8 flex gap-3 flex-wrap">
-             {['Navigate to Briefing', 'Add Urgent Bug Task', 'Check Integrations'].map(hint => (
+             {[
+               { hint: 'Go to Project Flow', action: 'Show me the tasks' },
+               { hint: 'Open Backend Node', action: 'Navigate to backend' },
+               { hint: 'Check Integrations', action: 'Go to integrations' }
+             ].map(item => (
                <button 
-                key={hint}
+                key={item.hint}
                 type="button"
-                onClick={() => setInput(hint)}
+                onClick={() => setInput(item.action)}
                 className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-400 hover:text-white hover:border-slate-500 transition-all"
                >
-                 {hint}
+                 {item.hint}
                </button>
              ))}
           </div>

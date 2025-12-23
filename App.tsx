@@ -10,16 +10,16 @@ import Notifications from './components/Notifications';
 import AdminUserManagement from './components/AdminUserManagement';
 import DevBlueprint from './components/DevBlueprint';
 import AutomationTest from './components/AutomationTest';
-import BackendDev from './components/BackendDev';
+import FrontendDev from './components/FrontendDev';
 import ResourcePlanner from './components/ResourcePlanner';
 import CredentialVault from './components/CredentialVault';
 import EmployeeManagement from './components/EmployeeManagement';
 import SRSBriefing from './components/SRSBriefing';
-import ChatNode from './components/ChatNode';
 import SystemFiles from './components/SystemFiles';
+import AIAssistant from './components/AIAssistant';
 import Login from './components/Login';
 import { ZOHO_A21_TEMPLATE, TRANSLATIONS } from './constants';
-import { ShieldCheck, Command, Globe } from 'lucide-react';
+import { ShieldCheck, Command } from 'lucide-react';
 
 const DEFAULT_NOTIF_SETTINGS: NotificationSettings = {
   taskAssignments: true,
@@ -80,9 +80,8 @@ const AppContent: React.FC = () => {
   const [project, setProject] = useState<Project>(DEFAULT_PROJECT);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notifSettings, setNotifSettings] = useState<NotificationSettings>(DEFAULT_NOTIF_SETTINGS);
-  const [language, setLanguage] = useState<Language>('en');
 
-  const t = TRANSLATIONS[language];
+  const t = TRANSLATIONS['en'];
 
   const addNotification = useCallback((message: string, type: Notification['type'], source: Notification['source'] = 'System') => {
     if (type === 'assignment' && !notifSettings.taskAssignments) return;
@@ -119,6 +118,13 @@ const AppContent: React.FC = () => {
     }));
   };
 
+  const handleAIAction = useCallback((name: string, args: any) => {
+    if (name === 'navigate' && args.tab) {
+      setActiveTab(args.tab);
+      addNotification(`System: AI navigated to section "${args.tab}"`, 'system');
+    }
+  }, [addNotification]);
+
   useEffect(() => {
     if (!currentUser) return;
     const checkDeadlines = () => {
@@ -142,7 +148,6 @@ const AppContent: React.FC = () => {
   }, [project.tasks, currentUser, notifications, addNotification]);
 
   const handleUpdateTests = (testCases: TestCase[]) => setProject(prev => ({ ...prev, testCases }));
-  const handleUpdateEndpoints = (endpoints: ApiEndpoint[]) => setProject(prev => ({ ...prev, endpoints }));
   const handleUpdateAllocations = (allocations: ResourceAllocation[]) => setProject(prev => ({ ...prev, allocations }));
   const handleUpdateCredentials = (credentials: Credential[]) => setProject(prev => ({ ...prev, credentials }));
 
@@ -150,8 +155,7 @@ const AppContent: React.FC = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'dashboard': return <Dashboard project={project} language={language} />;
-      case 'chat': return <ChatNode />;
+      case 'dashboard': return <Dashboard project={project} language="en" />;
       case 'srs': return <SRSBriefing />;
       case 'blueprint': return <DevBlueprint />;
       case 'tasks': return (
@@ -164,8 +168,8 @@ const AppContent: React.FC = () => {
       );
       case 'resources': return <ResourcePlanner project={project} onUpdateAllocations={handleUpdateAllocations} />;
       case 'employees': return <EmployeeManagement />;
-      case 'backend': return <BackendDev project={project} onUpdateEndpoints={handleUpdateEndpoints} />;
-      case 'system-files': return <SystemFiles language={language} />;
+      case 'frontend': return <FrontendDev project={project} />;
+      case 'system-files': return <SystemFiles language="en" />;
       case 'vault': return <CredentialVault credentials={project.credentials} userRole={currentUser.role} onUpdate={handleUpdateCredentials} />;
       case 'testcenter': return <AutomationTest project={project} onUpdateTests={handleUpdateTests} />;
       case 'integrations': return <Integrations settings={notifSettings} onUpdateSettings={setNotifSettings} />;
@@ -180,22 +184,22 @@ const AppContent: React.FC = () => {
       );
       case 'policy': return <PolicyCenter />;
       case 'users': return <AdminUserManagement />;
-      default: return <Dashboard project={project} language={language} />;
+      default: return <Dashboard project={project} language="en" />;
     }
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className={`flex bg-[#fdfdfd] min-h-screen ${language === 'ar' ? 'font-sans text-right' : ''}`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+    <div className={`flex bg-[#fdfdfd] min-h-screen`}>
       <Sidebar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
         unreadCount={unreadCount} 
         userRole={currentUser.role} 
-        language={language}
+        language="en"
       />
-      <main className={`flex-1 ${language === 'ar' ? 'mr-64' : 'ml-64'} p-2 overflow-x-hidden transition-all duration-300`}>
+      <main className={`flex-1 ml-64 p-2 overflow-x-hidden transition-all duration-300`}>
         <header className="sticky top-0 z-40 bg-black backdrop-blur-xl border-b border-emerald-900/20 px-10 py-5 flex justify-between items-center rounded-b-[32px] mb-4 shadow-2xl">
           <div className="flex items-center gap-6">
             <a href="https://rh.net.sa/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 group">
@@ -211,26 +215,17 @@ const AppContent: React.FC = () => {
                    {t.sovereign_os}
                 </h2>
                 <span className="text-[9px] text-emerald-500 font-bold uppercase tracking-widest mt-1 flex items-center gap-1">
-                  Laravel & Self-Hosted NoSQL <ShieldCheck size={8} />
+                   Sovereign Node <ShieldCheck size={8} />
                 </span>
               </div>
             </a>
           </div>
           <div className="flex items-center gap-5">
-             <button 
-                onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
-                className="bg-emerald-950/30 px-4 py-1.5 rounded-full border border-emerald-900/30 flex items-center gap-2 hover:bg-emerald-900/50 transition-all group"
-              >
-                <Globe size={12} className="text-emerald-500 group-hover:rotate-12 transition-transform" />
-                <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">
-                  {language === 'en' ? 'Arabic' : 'English'}
-                </span>
-             </button>
              <div className="bg-emerald-950/30 px-4 py-1.5 rounded-full border border-emerald-900/30 flex items-center gap-2">
                 <Command size={12} className="text-emerald-500" />
                 <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">{t.internal_node}</span>
              </div>
-             <div className={`${language === 'ar' ? 'text-left' : 'text-right'}`}>
+             <div className={`text-right`}>
                 <p className="text-xs font-black text-white uppercase tracking-tighter">{currentUser.name}</p>
                 <p className="text-[9px] text-emerald-500/70 font-bold uppercase tracking-[0.2em]">{currentUser.role}</p>
              </div>
@@ -249,6 +244,9 @@ const AppContent: React.FC = () => {
           {renderContent()}
         </div>
       </main>
+
+      {/* AI Assistant Bridge Integrated */}
+      <AIAssistant onAction={handleAIAction} />
     </div>
   );
 };

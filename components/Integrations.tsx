@@ -56,7 +56,7 @@ const Integrations: React.FC<IntegrationsProps> = ({ settings, onUpdateSettings 
       <header className="mb-10 flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-black text-slate-900 flex items-center gap-4 tracking-tighter uppercase">
-            <Share2 size={32} className="text-emerald-500" /> System Bridge Control
+            <Share2 size={32} className="text-emerald-500" /> Work Tools
           </h2>
           <p className="text-slate-500 mt-1 font-medium">Live synchronization between your Zoho, Slack, and Time Doctor instances.</p>
         </div>

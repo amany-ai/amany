@@ -5,7 +5,10 @@ import { Project, ResourceAllocation } from "../types";
 export const generateWeeklyResourceSummary = async (allocations: ResourceAllocation[]) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const prompt = `Act as an AI Resource Manager for a Laravel 11 & Self-Hosted MongoDB based production line. 
-  Summarize the following weekly resource plan for a Slack update:
+  Summarize the following weekly resource plan for a Slack update.
+  You MUST provide the summary in both English AND Arabic.
+  
+  Resources:
   ${JSON.stringify(allocations)}
   
   For EVERY employee, you MUST output exactly this structure:
@@ -17,8 +20,8 @@ export const generateWeeklyResourceSummary = async (allocations: ResourceAllocat
   - End Date: [Value]
   - Comment: [Value if found, otherwise "None"]
   
-  Ensure to mention the local Laravel/NoSQL stack health in the summary.
-  Use clean Slack-ready markdown. Add a brief executive summary at the top.`;
+  Ensure to mention the local Laravel/NoSQL stack health in both languages.
+  Use clean Slack-ready markdown. Add a brief executive summary at the top in both languages.`;
 
   try {
     const response = await ai.models.generateContent({
@@ -34,14 +37,17 @@ export const generateWeeklyResourceSummary = async (allocations: ResourceAllocat
 
 export const generateApiBlueprint = async (requirement: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const prompt = `Act as a Senior Laravel & NoSQL Architect. Convert this requirement into a production-ready Laravel 11 & Internal MongoDB blueprint: ${requirement}.
+  const prompt = `Act as a Senior Laravel & NoSQL Architect. Convert this requirement into a production-ready Laravel 11 & Internal MongoDB blueprint.
+  The input might be in English or Arabic. Handle both gracefully.
+  Requirement: ${requirement}.
+  
   Output should include:
   1. Laravel REST Controllers using Moloquent (Laravel-MongoDB) & API Routes optimized for local hosting.
   2. MongoDB Document Schemas (BSON/JSON structure with local performance indexes).
   3. Swift 6.0 Model stubs for iOS Native integration.
   
   Focus on low-latency internal network performance for native mobile apps.
-  Return as a clean JSON object.`;
+  Return as a clean JSON object. Descriptions within the JSON can be in Arabic if the input was Arabic.`;
 
   try {
     const response = await ai.models.generateContent({
@@ -90,10 +96,11 @@ export const analyzeFigmaDesign = async (imageData?: string, figmaLink?: string)
   }
   
   const textPrompt = `Act as a Senior Laravel & NoSQL Architect. Analyze the provided ${imageData ? 'UI design mockup' : 'Figma link: ' + figmaLink}.
+  Detect the language of the UI. If it is Arabic, provide analysis in Arabic.
   1. Identify all required data entities and attributes visible in the UI.
   2. Design a Laravel 11 Controller with MongoDB Eloquent (Moloquent) to support this UI using internal node logic.
   3. Create Swift Codable Data Models for iOS Native integration.
-  4. Define a Self-Hosted MongoDB (NoSQL) Document structure with appropriate collections.
+  4. Define a Self-Hosted MongoDB (NoSQL) Document structure.
   
   Return the result in JSON format.`;
   
@@ -137,10 +144,9 @@ export const analyzeFigmaDesign = async (imageData?: string, figmaLink?: string)
 export const estimateSalesFromBRD = async (brdContent: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const prompt = `Act as a Senior Project Estimator. 
-  Analyze this BRD: ${brdContent}.
+  Analyze this BRD (Could be English or Arabic): ${brdContent}.
   Technical Stack: Laravel 11 Backend + Self-Hosted MongoDB + Native Mobile (Kotlin/Swift).
-  Consider the 22-day production cycle and high-performance local NoSQL requirements.
-  Provide an estimation in JSON format.`;
+  Provide an estimation in JSON format. Provide text-based fields in the same language as the input.`;
 
   try {
     const response = await ai.models.generateContent({
@@ -182,11 +188,9 @@ export const estimateSalesFromBRD = async (brdContent: string) => {
 export const orchestrateOneClickFlow = async (documentContent: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const prompt = `You are the PM Orchestrator. Convert this ${documentContent.length > 500 ? 'SRS' : 'BRD'} into a full A21-Txx Zoho Project Plan.
-  Tech Stack: Laravel 11 Backend + Internal MongoDB NoSQL Database.
-  Document: ${documentContent}
-  Target: Native Android (Kotlin), Native iOS (SwiftUI), Laravel Backend, Admin Dashboard.
-  Generate roles for BA, UI, Android, iOS, Backend, and QA.
-  Ensure tasks include local NoSQL schema design and Laravel API implementation.`;
+  Document (English or Arabic): ${documentContent}
+  Generate the project plan. If the document is Arabic, ensure task titles are in Arabic.
+  Tech Stack: Laravel 11 Backend + Internal MongoDB NoSQL Database.`;
 
   try {
     const response = await ai.models.generateContent({
@@ -226,8 +230,9 @@ export const orchestrateOneClickFlow = async (documentContent: string) => {
 export const getProjectInsights = async (project: Project) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const prompt = `Analyze this Project Status: ${JSON.stringify(project)}.
-  Environment: Laravel 11 + Self-Hosted MongoDB + Native Mobile.
-  Check GitLab commit frequency in laravel-backend and native repos, Zoho task completion, and internal node integrity.`;
+  Provide a concise executive summary and risk assessment. 
+  If the current system language or task titles are predominantly Arabic, provide insights in Arabic. 
+  Environment: Laravel 11 + Self-Hosted MongoDB + Native Mobile.`;
 
   try {
     const response = await ai.models.generateContent({
@@ -280,12 +285,12 @@ export const processAICommand = async (input: string) => {
 
 export const analyzeSRS = async (content: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const prompt = `You are a Technical Architect specialized in Laravel 11 & Self-Hosted MongoDB. Analyze this Software Requirements Specification (SRS) for a 22-day production cycle:
+  const prompt = `You are a Technical Architect specialized in Laravel 11 & Self-Hosted MongoDB. 
+  Analyze this Software Requirements Specification (SRS) for a 22-day production cycle.
+  Detect if the content is Arabic or English and respond in the matching language.
   
   SRS Content:
-  ${content}
-  
-  Evaluate technical feasibility for a Laravel/Internal-NoSQL stack, identify potential local MongoDB schema risks, and propose a structured task template.`;
+  ${content}`;
 
   try {
     const response = await ai.models.generateContent({
@@ -326,11 +331,9 @@ export const analyzeSRS = async (content: string) => {
 
 export const generateTestSuite = async (srs: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const prompt = `Act as a Senior QA Automation Engineer. Generate automated tests for the following:
+  const prompt = `Act as a Senior QA Automation Engineer. Generate automated tests for the following requirements (AR or EN):
   ${srs}
-  
-  Stack: Laravel 11 API + Internal MongoDB + Native Mobile.
-  Focus on API integrity (Pest/PHPUnit) and Mobile flows (Appium).`;
+  Respond in the language of the input.`;
 
   try {
     const response = await ai.models.generateContent({

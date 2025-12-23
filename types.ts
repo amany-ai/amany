@@ -1,4 +1,6 @@
 
+export type Language = 'en' | 'ar';
+
 export enum ProjectPhase {
   BA_DESIGN = 'BA & Design Stage',
   FOUNDATION = 'First Phase - Foundation',

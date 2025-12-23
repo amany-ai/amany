@@ -35,100 +35,33 @@ export interface FileAttachment {
   id: string;
   name: string;
   type: string;
-  url: string; // base64 or blob URL
+  url: string; 
   size: number;
 }
 
-export interface NotificationSettings {
-  taskAssignments: boolean;
-  deadlineApproaching: boolean;
-  statusChanges: boolean;
-  systemAlerts: boolean;
-}
-
-export interface Credential {
-  id: string;
-  title: string;
-  type: 'API Key' | 'Database' | 'SSH/Server' | 'Service Account' | 'Web Login';
-  environment: 'Dev' | 'Staging' | 'Production';
-  identifier: string;
-  secretValue: string;
-  comments: string;
-  lastUpdated: string;
-}
-
-export interface ResourceAllocation {
-  id: string;
-  employeeId: string;
-  employeeName: string;
-  title: string;
-  projectName: string;
-  taskName: string;
-  startDate: string;
-  endDate: string;
-  comments: string;
-}
-
-export interface ApiEndpoint {
-  id: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  path: string;
-  status: 'Draft' | 'Deployed' | 'Deprecated';
-  xcodeSynced: boolean;
-  windsurfVerified: boolean;
-  attachments?: FileAttachment[];
-}
-
-export interface TestCase {
-  id: string;
-  title: string;
-  type: 'Functional' | 'UI' | 'Performance' | 'Security';
-  priority: 'Critical' | 'High' | 'Medium';
-  status: 'Pass' | 'Fail' | 'Pending' | 'Running';
-  platform: 'Android' | 'iOS' | 'Web' | 'API';
-  automationScript?: string;
-  lastRun?: string;
-}
-
-export interface GitLabUpdate {
-  id: string;
-  author: string;
-  repo: string;
-  message: string;
-  timestamp: string;
-  linesAdded: number;
-  linesRemoved: number;
-}
-
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: UserRole;
-  password?: string;
-  avatar?: string;
-  notificationSettings?: NotificationSettings;
-}
-
-export interface Task {
-  id: string;
-  zohoTaskId: string;
-  title: string;
-  ownerId: string;
-  status: TaskStatus;
-  durationDays: number;
-  priority: 'High' | 'Medium' | 'Low';
-  comments: string[];
-  isDoDMet: boolean;
-  dependencies: string[];
-  roleTarget: UserRole;
-  dueDate?: string;
-  attachments?: FileAttachment[];
-  testResults?: {
-    total: number;
-    passed: number;
-    failed: number;
+export interface EstimationResult {
+  totalDurationDays: number;
+  breakdown: {
+    backend: number;
+    admin: number;
+    web: number;
+    android: number;
+    ios: number;
+    qa: number;
   };
+  complexity: 'Low' | 'Medium' | 'High';
+  reusableModulesFound: string[];
+  externalIntegrations: string[];
+  risks: string[];
+  justification: string;
+}
+
+export interface EstimationMethodology {
+  id: string;
+  category: string;
+  task: string;
+  standardHours: number;
+  description: string;
 }
 
 export interface Project {
@@ -151,6 +84,29 @@ export interface Project {
   };
 }
 
+export interface Task {
+  id: string;
+  zohoTaskId: string;
+  title: string;
+  ownerId: string;
+  status: TaskStatus;
+  durationDays: number;
+  priority: 'High' | 'Medium' | 'Low';
+  comments: string[];
+  isDoDMet: boolean;
+  dependencies: string[];
+  roleTarget: UserRole;
+  dueDate?: string;
+  attachments?: FileAttachment[];
+}
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+}
+
 export interface Notification {
   id: string;
   source: 'Zoho' | 'Slack' | 'TimeDoctor' | 'GitLab' | 'System';
@@ -161,38 +117,98 @@ export interface Notification {
   channel?: string;
 }
 
-export interface TeamMember {
+// Added missing GitLabUpdate interface
+export interface GitLabUpdate {
   id: string;
-  name: string;
-  role: string;
-  email: string;
-  userRole: UserRole;
-  projectType: 'Mobile' | 'Web' | 'Both';
-  shiftStartTime: string;
-  status: 'Active' | 'On Leave' | 'Offboarded';
-  zohoId?: string;
-  timeDoctorId?: string;
+  author: string;
+  repo: string;
+  message: string;
+  timestamp: string;
+  linesAdded: number;
+  linesRemoved: number;
 }
 
+// Added missing TestCase interface
+export interface TestCase {
+  id: string;
+  title: string;
+  platform: 'Android' | 'iOS' | 'Web';
+  status: 'Pass' | 'Fail' | 'Running' | 'Pending';
+  priority: 'Critical' | 'Medium' | 'Low';
+  type: string;
+  lastRun: string;
+  automationScript?: string;
+}
+
+// Added missing ApiEndpoint interface
+export interface ApiEndpoint {
+  id: string;
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  path: string;
+  status: 'Deployed' | 'Draft' | 'Deprecated';
+  xcodeSynced: boolean;
+  windsurfVerified: boolean;
+}
+
+// Added missing ResourceAllocation interface
+export interface ResourceAllocation {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  title: string;
+  projectName: string;
+  taskName: string;
+  startDate: string;
+  endDate: string;
+  comments?: string;
+}
+
+// Added missing Credential interface
+export interface Credential {
+  id: string;
+  title: string;
+  type: 'API Key' | 'Database' | 'SSH/Server' | 'Service Account' | 'Web Login';
+  environment: 'Dev' | 'Staging' | 'Production';
+  identifier: string;
+  secretValue: string;
+  comments?: string;
+  lastUpdated: string;
+}
+
+// Added missing NotificationSettings interface
+export interface NotificationSettings {
+  taskAssignments: boolean;
+  deadlineApproaching: boolean;
+  statusChanges: boolean;
+  systemAlerts: boolean;
+}
+
+// Added missing IntegrationSettings interface
 export interface IntegrationSettings {
   maxIdleMinutes: number;
   shiftStartTime: string;
   slackAlertChannel: string;
-  reportingFrequency: string;
+  reportingFrequency: 'Daily' | 'Weekly' | 'Monthly';
 }
 
+// Added missing ServiceConnection interface
 export interface ServiceConnection {
   id: string;
   name: string;
-  status: string;
+  status: 'Connected' | 'Disconnected' | 'Syncing';
   lastSync: string;
 }
 
-export interface EstimationResult {
-  totalHours: number;
-  complexity: string;
-  roleBreakdown: { role: string; hours: number }[];
-  risks: string[];
-  suggestedTimelineWeeks: number;
-  estimatedCost: string;
+// Added missing TeamMember interface
+export interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  userRole: UserRole;
+  status: 'Active' | 'On Leave' | 'Offboarded';
+  projectType: 'Mobile' | 'Web' | 'Both';
+  shiftStartTime: string;
+  zohoId?: string;
+  timeDoctorId?: string;
 }

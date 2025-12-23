@@ -12,7 +12,8 @@ const SalesEstimator: React.FC = () => {
   const handleEstimate = async () => {
     if (!brd) return;
     setLoading(true);
-    const data = await estimateSalesFromBRD(brd);
+    // Fixed: Added second argument to estimateSalesFromBRD call
+    const data = await estimateSalesFromBRD(brd, { isPremiumWeb: false, complexity: 'Low' });
     setResult(data);
     setLoading(false);
   };
@@ -63,7 +64,8 @@ const SalesEstimator: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Total Effort</p>
-                   <p className="text-2xl font-black text-slate-900">{result.totalHours} Hours</p>
+                   {/* Fixed: Used totalDurationDays instead of totalHours */}
+                   <p className="text-2xl font-black text-slate-900">{result.totalDurationDays} Days</p>
                 </div>
                 <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Complexity</p>
@@ -75,19 +77,19 @@ const SalesEstimator: React.FC = () => {
 
               <div className="bg-slate-900 text-white rounded-[32px] p-8 shadow-xl">
                  <h3 className="font-bold mb-6 flex items-center gap-2">
-                    <Clock size={18} className="text-amber-400" /> Role Breakdown (Estimated Hours)
+                    <Clock size={18} className="text-amber-400" /> Role Breakdown (Estimated Days)
                  </h3>
                  <div className="space-y-4">
-                    {/* Fix: roleBreakdown is an array as defined in the GenAI schema and now in types.ts */}
-                    {result.roleBreakdown.map((item) => (
-                      <div key={item.role} className="flex justify-between items-center">
-                         <span className="text-sm font-medium text-slate-400">{item.role}</span>
+                    {/* Fixed: Mapped Object.entries of breakdown to correctly display estimated days */}
+                    {Object.entries(result.breakdown).map(([role, days]) => (
+                      <div key={role} className="flex justify-between items-center">
+                         <span className="text-sm font-medium text-slate-400 uppercase">{role}</span>
                          <div className="flex items-center gap-4 flex-1 mx-6">
                             <div className="h-1.5 bg-slate-800 rounded-full flex-1">
-                               <div className="h-full bg-blue-500 rounded-full" style={{ width: `${(item.hours / result.totalHours) * 100}%` }}></div>
+                               <div className="h-full bg-blue-500 rounded-full" style={{ width: `${(days / result.totalDurationDays) * 100}%` }}></div>
                             </div>
                          </div>
-                         <span className="text-sm font-bold">{item.hours}h</span>
+                         <span className="text-sm font-bold">{days}d</span>
                       </div>
                     ))}
                  </div>

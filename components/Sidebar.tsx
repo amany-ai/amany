@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { LayoutDashboard, CheckCircle, Users, ShieldAlert, Share2, Bell, Cpu, Beaker, Lock, BookOpen, SearchCode, FileCode, Shield, Layout } from 'lucide-react';
+import { LayoutDashboard, CheckCircle, Users, ShieldAlert, Share2, Bell, Cpu, Beaker, Lock, BookOpen, SearchCode, FileCode, Shield, Layout, Calculator } from 'lucide-react';
 import { UserRole, Language } from '../types';
 import { TRANSLATIONS } from '../constants';
 
@@ -18,7 +18,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, unreadCount,
   const menuItems = [
     { id: 'dashboard', label: t.dashboard, icon: <LayoutDashboard size={18} />, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER, UserRole.BA, UserRole.FE_DEV, UserRole.BE_DEV, UserRole.ANDROID_DEV, UserRole.IOS_DEV, UserRole.QA, UserRole.DESIGNER] },
     { id: 'srs', label: t.srs, icon: <SearchCode size={18} />, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER, UserRole.BA] },
-    { id: 'blueprint', label: t.blueprint, icon: <Cpu size={18} />, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER] },
+    { id: 'blueprint', label: t.blueprint, icon: <Calculator size={18} />, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER, UserRole.SALES] },
     { id: 'tasks', label: t.tasks, icon: <CheckCircle size={18} />, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER, UserRole.BA, UserRole.FE_DEV, UserRole.BE_DEV, UserRole.ANDROID_DEV, UserRole.IOS_DEV, UserRole.QA, UserRole.DESIGNER] },
     { id: 'resources', label: t.resources, icon: <BookOpen size={18} />, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER] },
     { id: 'employees', label: t.employees, icon: <Users size={18} />, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER] },
@@ -39,7 +39,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, unreadCount,
       <div className="p-8 flex flex-col gap-4">
         <div className="group flex flex-col items-center gap-4">
           <div className="w-full bg-black p-4 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.1)] group-hover:scale-105 transition-all h-16 border border-white/5">
-             {/* Rh Logo SVG */}
              <svg viewBox="0 0 100 100" className="h-full w-full text-white fill-current">
                 <rect x="0" y="0" width="100" height="100" rx="22" fill="black" />
                 <text x="50" y="68" textAnchor="middle" fontSize="52" fontWeight="900" fontFamily="Inter, sans-serif" fill="white">Rh</text>

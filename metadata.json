@@ -1,0 +1,8 @@
+{
+  "name": "Copy of PM-Auto: Project Flow 2026",
+  "description": "An automated project management suite designed around the 22-day development blueprint, integrating task tracking, policy enforcement, and AI-driven workflow optimization.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

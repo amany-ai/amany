@@ -37,19 +37,19 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, unreadCount,
   return (
     <div className={`w-64 bg-black h-screen flex flex-col text-slate-400 fixed left-0 border-r top-0 z-50 shadow-2xl border-emerald-900/30 transition-all duration-300`}>
       <div className="p-8 flex flex-col gap-4">
-        <a href="https://rh.net.sa/" target="_blank" rel="noopener noreferrer" className="group flex flex-col items-center no-underline gap-4">
-          <div className="w-full bg-emerald-500 p-4 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.2)] group-hover:scale-105 transition-all">
-             <img 
-               src="https://rh.net.sa/wp-content/uploads/2021/04/logo-rowaad.png" 
-               alt="Rowaad Logo" 
-               className="h-8 w-auto brightness-0"
-             />
+        <div className="group flex flex-col items-center gap-4">
+          <div className="w-full bg-black p-4 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.1)] group-hover:scale-105 transition-all h-16 border border-white/5">
+             {/* Rh Logo SVG */}
+             <svg viewBox="0 0 100 100" className="h-full w-full text-white fill-current">
+                <rect x="0" y="0" width="100" height="100" rx="22" fill="black" />
+                <text x="50" y="68" textAnchor="middle" fontSize="52" fontWeight="900" fontFamily="Inter, sans-serif" fill="white">Rh</text>
+             </svg>
           </div>
           <div className="text-center">
-            <h1 className="text-lg font-black text-white tracking-tighter leading-none">ROWAAD</h1>
+            <h1 className="text-xl font-black text-white tracking-tighter leading-none">ROWAAD</h1>
             <p className="text-emerald-500 text-[8px] font-black tracking-[0.3em] uppercase mt-1">Sovereign OS</p>
           </div>
-        </a>
+        </div>
       </div>
 
       <nav className="flex-1 mt-2 px-4 space-y-1.5 overflow-y-auto custom-scrollbar">

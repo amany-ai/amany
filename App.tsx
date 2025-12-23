@@ -53,7 +53,7 @@ const INITIAL_CREDENTIALS: Credential[] = [
 
 const DEFAULT_PROJECT: Project = {
   id: 'PRJ-NODE-001',
-  name: 'Rowaad Core Stream',
+  name: 'ROWAAD Core Stream',
   type: 'Both',
   currentDay: 6,
   totalDays: 22,
@@ -202,23 +202,23 @@ const AppContent: React.FC = () => {
       <main className={`flex-1 ml-64 p-2 overflow-x-hidden transition-all duration-300`}>
         <header className="sticky top-0 z-40 bg-black backdrop-blur-xl border-b border-emerald-900/20 px-10 py-5 flex justify-between items-center rounded-b-[32px] mb-4 shadow-2xl">
           <div className="flex items-center gap-6">
-            <a href="https://rh.net.sa/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 group">
-              <div className="h-10 w-auto flex items-center bg-emerald-500 rounded-lg px-3 group-hover:bg-white transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-                <img 
-                  src="https://rh.net.sa/wp-content/uploads/2021/04/logo-rowaad.png" 
-                  alt="R" 
-                  className="h-6 w-auto brightness-0"
-                />
+            <div className="flex items-center gap-4 group">
+              <div className="h-10 w-10 flex items-center justify-center bg-black rounded-lg group-hover:bg-white transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)] border border-white/10">
+                {/* Rh Logo SVG Small */}
+                <svg viewBox="0 0 100 100" className="h-7 w-7 text-white fill-current">
+                   <rect x="0" y="0" width="100" height="100" rx="20" fill="black" />
+                   <text x="50" y="68" textAnchor="middle" fontSize="50" fontWeight="900" fontFamily="Inter, sans-serif" fill="white">Rh</text>
+                </svg>
               </div>
               <div className="flex flex-col">
                 <h2 className="font-black text-white tracking-tight uppercase text-sm leading-none">
-                   {t.sovereign_os}
+                   ROWAAD SYSTEM
                 </h2>
                 <span className="text-[9px] text-emerald-500 font-bold uppercase tracking-widest mt-1 flex items-center gap-1">
                    Sovereign Node <ShieldCheck size={8} />
                 </span>
               </div>
-            </a>
+            </div>
           </div>
           <div className="flex items-center gap-5">
              <div className="bg-emerald-950/30 px-4 py-1.5 rounded-full border border-emerald-900/30 flex items-center gap-2">

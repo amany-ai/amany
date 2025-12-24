@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Users, Plus, Trash2, Sparkles, Briefcase, Calendar } from 'lucide-react';
+import { Users, Plus, Trash2, Sparkles, Briefcase, Calendar, RefreshCw } from 'lucide-react';
 import { ResourceAllocation, Project } from '../types';
 import { generateWeeklyResourceSummary } from '../services/geminiService';
 
@@ -68,5 +68,4 @@ const ResourcePlanner: React.FC<ResourcePlannerProps> = ({ project, onUpdateAllo
   );
 };
 
-import { RefreshCw } from 'lucide-react';
 export default ResourcePlanner;

@@ -15,7 +15,6 @@ interface ZohoTasksProps {
 const ZohoTasks: React.FC<ZohoTasksProps> = ({ project, currentUserRole, onUpdateStatus, onAddTask, onUpdateAttachments }) => {
   const [filterStatus, setFilterStatus] = useState<string>('All');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [activeTaskForAttach, setActiveTaskForAttach] = useState<string | null>(null);
 
   const canEdit = currentUserRole === UserRole.ADMIN || currentUserRole === UserRole.PROJECT_MANAGER;
 
@@ -29,11 +28,6 @@ const ZohoTasks: React.FC<ZohoTasksProps> = ({ project, currentUserRole, onUpdat
 
   const getOwnerName = (ownerId: string) => {
     return TEAM_MEMBERS.find(m => m.id === ownerId)?.name || ownerId;
-  };
-
-  const handleAttach = (taskId: string) => {
-    setActiveTaskForAttach(taskId);
-    fileInputRef.current?.click();
   };
 
   const filteredTasks = filterStatus === 'All' 

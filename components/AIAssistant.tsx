@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Sparkles, Terminal, X, ArrowUpRight, Command } from 'lucide-react';
-import { processAICommand } from '../services/geminiService';
+import { processCommandAgent } from '../services/geminiService';
 
 interface AIAssistantProps {
   onAction: (name: string, args: any) => void;
@@ -19,7 +19,6 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onAction }) => {
     }
   }, [isOpen]);
 
-  // Global keyboard shortcut
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
@@ -37,14 +36,14 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onAction }) => {
 
     setLoading(true);
     try {
-      const actions = await processAICommand(input);
+      const actions = await processCommandAgent(input);
       if (actions && actions.length > 0) {
         actions.forEach(a => onAction(a.name, a.args));
         setIsOpen(false);
         setInput('');
       }
     } catch (err) {
-      console.error("Failed to process AI command", err);
+      console.error("failed to process command agent", err);
     } finally {
       setLoading(false);
     }
@@ -56,8 +55,8 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onAction }) => {
       className="fixed bottom-8 right-8 w-16 h-16 bg-slate-900 text-white rounded-[24px] flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-50 group border border-slate-700"
     >
       <Sparkles size={28} className="text-amber-400 animate-pulse" />
-      <div className="absolute right-20 bg-white border border-slate-200 px-4 py-2 rounded-xl text-xs font-bold text-slate-600 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-        Summon AI Bridge (⌘K)
+      <div className="absolute right-20 bg-white border border-slate-200 px-4 py-2 rounded-xl text-xs font-bold text-slate-600 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none lowercase">
+        command agent (⌘k)
       </div>
     </button>
   );
@@ -68,7 +67,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onAction }) => {
         <div className="p-6 border-b border-slate-800 flex justify-between items-center">
           <div className="flex items-center gap-3">
              <Command className="text-blue-500" size={20} />
-             <span className="text-sm font-bold text-white uppercase tracking-widest">Command Center</span>
+             <span className="text-sm font-bold text-white uppercase tracking-widest lowercase generous-spacing">command agent node</span>
           </div>
           <button onClick={() => setIsOpen(false)} className="p-2 text-slate-500 hover:text-white transition-colors">
             <X size={20} />
@@ -82,8 +81,8 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onAction }) => {
                 ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="What action should I perform? (e.g. 'Show me the task list')"
-                className="w-full bg-slate-800 border-2 border-slate-700 rounded-[28px] pl-14 pr-6 py-6 outline-none focus:border-blue-500 text-white font-medium text-lg placeholder:text-slate-600 transition-all"
+                placeholder="give a task to the orchestrator..."
+                className="w-full bg-slate-800 border-2 border-slate-700 rounded-[28px] pl-14 pr-6 py-6 outline-none focus:border-blue-500 text-white font-medium text-lg placeholder:text-slate-600 transition-all lowercase"
              />
              <div className="absolute right-4 top-1/2 -translate-y-1/2">
                 {loading ? (
@@ -98,15 +97,15 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onAction }) => {
           
           <div className="mt-8 flex gap-3 flex-wrap">
              {[
-               { hint: 'Go to Project Flow', action: 'Show me the tasks' },
-               { hint: 'Open Backend Node', action: 'Navigate to backend' },
-               { hint: 'Check Integrations', action: 'Go to integrations' }
+               { hint: 'view work flow', action: 'go to workflow agent' },
+               { hint: 'calculate specs', action: 'open estimator agent' },
+               { hint: 'check sync', action: 'navigate to int agent' }
              ].map(item => (
                <button 
                 key={item.hint}
                 type="button"
                 onClick={() => setInput(item.action)}
-                className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-400 hover:text-white hover:border-slate-500 transition-all"
+                className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-400 hover:text-white hover:border-slate-500 transition-all lowercase"
                >
                  {item.hint}
                </button>

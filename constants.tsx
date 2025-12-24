@@ -1,32 +1,63 @@
 
 import { ProjectPhase, TaskStatus, UserRole, Task, Language, TeamMember } from './types';
 
+export const WORKFLOW_RULES = {
+  TIME_DOCTOR_RULES: [
+    "idle time must remain below 25%. system triggers auto-alerts to hr if threshold is breached.",
+    "every session requires at least 1 commit. ghost sessions are flagged for manual review.",
+    "architectural stubs must be generated via windsurf ai bridge for all core modules."
+  ],
+  DOD_CHECKLIST: [
+    "self-code review completed",
+    "unit tests passing in local node",
+    "gitlab commit message follows a21 standards",
+    "api documentation updated in bridge",
+    "security scan passed (artisan audit)",
+    "figma design verified for mobile/web parity"
+  ]
+};
+
 export const ROWAD_ESTIMATION_RULES = {
-  QA_FIXED_DAYS: 10,
+  QA_FIXED_BASE: 10,
+  QA_PER_PLATFORM_INCREMENT: 3,
   ADMIN_PERCENT_OF_BACKEND: 0.20,
   WEB_STANDARD_DAYS: 30,
   WEB_PREMIUM_MODIFIER: 0.20,
+  REUSE_DISCOUNT: 0.40,
   COMPLEXITY_MODIFIERS: {
     LOW: 0,
     MEDIUM: 0.10,
     HIGH: 0.20
   },
-  SAUDI_REGULATIONS_NOTICE: "All integrations must comply with Saudi commercial and software regulations (Nafath, SAMA, CITC).",
+  DEFAULT_ROLE_RATES: {
+    BA: 12000,
+    Backend: 18000,
+    Frontend: 17000,
+    Android: 18000,
+    iOS: 18000,
+    QA: 14000,
+    PM: 16000,
+    AccountManager: 12000
+  },
   REUSABLE_MODULES: [
-    "Users & Auth",
-    "Address Book",
-    "Orders Management",
-    "Wallet & Transactions",
-    "Notifications Hub",
-    "Settings & Profile",
-    "Search & Filters"
+    "AddressBook",
+    "Orders",
+    "Wallet",
+    "Payments",
+    "Notifications",
+    "User Management",
+    "Roles and Permissions",
+    "Reporting",
+    "CMS",
+    "Chat",
+    "Delivery Tracking"
   ]
 };
 
 export const TRANSLATIONS: Record<Language, any> = {
   en: {
     dashboard: 'dashboard',
-    blueprint: 'estimator agent',
+    blueprint: 'estimator mesh',
     tasks: 'workflow agent',
     resources: 'planner agent',
     employees: 'hr agent',
@@ -64,28 +95,12 @@ export const TRANSLATIONS: Record<Language, any> = {
   }
 };
 
-export const WORKFLOW_RULES = {
-  TIME_DOCTOR_RULES: [
-    "idle time must be below 25%",
-    "at least one gitlab commit per day is mandatory",
-    "windsurf ai bridge must be used for all coding tasks"
-  ],
-  DOD_CHECKLIST: [
-    "unit tests pass",
-    "code reviewed by lead",
-    "figma design match",
-    "api documentation updated",
-    "time doctor logs synced",
-    "gitlab commit pushed"
-  ]
-};
-
 export const TEAM_MEMBERS: TeamMember[] = [
-  { id: '1', name: 'Amany', email: 'amany@rh.net.sa', role: 'Admin', userRole: UserRole.ADMIN, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', zohoId: 'Z-001', timeDoctorId: 'TD-001' },
-  { id: '2', name: 'Ahmed BA', email: 'ahmed@rh.net.sa', role: 'Business Analyst', userRole: UserRole.BA, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', zohoId: 'Z-002', timeDoctorId: 'TD-002' },
-  { id: '4', name: 'Omar Backend', email: 'omar@rh.net.sa', role: 'Backend Developer', userRole: UserRole.BE_DEV, status: 'Active', projectType: 'Web', shiftStartTime: '09:00', zohoId: 'Z-004', timeDoctorId: 'TD-004' },
-  { id: '5', name: 'Khalid Android', email: 'khalid@rh.net.sa', role: 'Android Developer', userRole: UserRole.ANDROID_DEV, status: 'Active', projectType: 'Mobile', shiftStartTime: '09:00', zohoId: 'Z-005', timeDoctorId: 'TD-005' },
-  { id: '7', name: 'Sara QA', email: 'sara@rh.net.sa', role: 'Quality Assurance', userRole: UserRole.QA, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', zohoId: 'Z-007', timeDoctorId: 'TD-007' }
+  { id: '1', name: 'amany', email: 'amany@rh.net.sa', role: 'admin', userRole: UserRole.ADMIN, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', zohoId: 'Z-001', timeDoctorId: 'TD-001' },
+  { id: '2', name: 'ahmed ba', email: 'ahmed@rh.net.sa', role: 'business analyst', userRole: UserRole.BA, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', zohoId: 'Z-002', timeDoctorId: 'TD-002' },
+  { id: '4', name: 'omar backend', email: 'omar@rh.net.sa', role: 'backend developer', userRole: UserRole.BE_DEV, status: 'Active', projectType: 'Web', shiftStartTime: '09:00', zohoId: 'Z-004', timeDoctorId: 'TD-004' },
+  { id: '5', name: 'khalid android', email: 'khalid@rh.net.sa', role: 'android developer', userRole: UserRole.ANDROID_DEV, status: 'Active', projectType: 'Mobile', shiftStartTime: '09:00', zohoId: 'Z-005', timeDoctorId: 'TD-005' },
+  { id: '7', name: 'sara qa', email: 'sara@rh.net.sa', role: 'quality assurance', userRole: UserRole.QA, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', zohoId: 'Z-002', timeDoctorId: 'TD-002' }
 ];
 
 export const ZOHO_A21_TEMPLATE: Task[] = [

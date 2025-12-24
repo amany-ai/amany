@@ -1,11 +1,11 @@
 
 import React, { useState } from 'react';
-import { Users, Plus, RefreshCw, Search, ShieldCheck } from 'lucide-react';
+import { Users, RefreshCw, Search } from 'lucide-react';
 import { TeamMember } from '../types';
 import { TEAM_MEMBERS as INITIAL_MEMBERS } from '../constants';
 
 const EmployeeManagement: React.FC = () => {
-  const [employees] = useState<TeamMember[]>(INITIAL_MEMBERS.map(m => ({ ...m, email: m.email || `${m.name.toLowerCase().replace(' ', '.')}@company.com`, status: 'Active' })));
+  const [employees] = useState<TeamMember[]>(INITIAL_MEMBERS.map(m => ({ ...m, status: 'Active' })));
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredEmployees = employees.filter(e => 

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { FileText, Calculator, DollarSign, Clock, ShieldAlert, Download, Zap } from 'lucide-react';
 import { estimateSalesFromBRD } from '../services/geminiService';
@@ -63,12 +62,14 @@ const SalesEstimator: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Total Effort</p>
-                   <p className="text-2xl font-black text-slate-900">{result.totalDurationDays} Days</p>
+                   {/* FIXED: Renamed totalDurationDays to duration_working_days to match EstimationResult interface */}
+                   <p className="text-2xl font-black text-slate-900">{result.duration_working_days} Days</p>
                 </div>
                 <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Complexity</p>
-                   <p className={`text-2xl font-black ${result.complexity === 'High' ? 'text-red-600' : 'text-emerald-600'}`}>
-                     {result.complexity}
+                   {/* FIXED: Accessed complexity through the scope object in EstimationResult */}
+                   <p className={`text-2xl font-black ${result.scope.complexity === 'High' ? 'text-red-600' : 'text-emerald-600'}`}>
+                     {result.scope.complexity}
                    </p>
                 </div>
               </div>
@@ -78,17 +79,23 @@ const SalesEstimator: React.FC = () => {
                     <Clock size={18} className="text-amber-400" /> Role Breakdown (Estimated Days)
                  </h3>
                  <div className="space-y-4">
-                    {Object.entries(result.breakdown || {}).map(([role, days]) => (
-                      <div key={role} className="flex justify-between items-center">
-                         <span className="text-sm font-medium text-slate-400 uppercase">{role}</span>
-                         <div className="flex items-center gap-4 flex-1 mx-6">
-                            <div className="h-1.5 bg-slate-800 rounded-full flex-1">
-                               <div className="h-full bg-blue-500 rounded-full" style={{ width: `${(Number(days) / result.totalDurationDays) * 100}%` }}></div>
-                            </div>
-                         </div>
-                         <span className="text-sm font-bold">{days}d</span>
-                      </div>
-                    ))}
+                    {/* FIXED: Renamed platformBreakdown to effort_days and removed unnecessary filter for a cleaner role list */}
+                    {Object.entries(result.effort_days || {})
+                      .map(([role, days]) => {
+                        const dayCount = days as number;
+                        return (
+                          <div key={role} className="flex justify-between items-center">
+                             <span className="text-sm font-medium text-slate-400 uppercase">{role}</span>
+                             <div className="flex items-center gap-4 flex-1 mx-6">
+                                <div className="h-1.5 bg-slate-800 rounded-full flex-1">
+                                   {/* FIXED: Renamed totalDurationDays to duration_working_days */}
+                                   <div className="h-full bg-blue-500 rounded-full" style={{ width: `${(dayCount / result.duration_working_days) * 100}%` }}></div>
+                                </div>
+                             </div>
+                             <span className="text-sm font-bold">{dayCount}d</span>
+                          </div>
+                        );
+                    })}
                  </div>
               </div>
 
@@ -97,9 +104,10 @@ const SalesEstimator: React.FC = () => {
                     <ShieldAlert size={16} className="text-amber-500" /> Risk Mitigation
                  </h3>
                  <ul className="space-y-2">
-                    {(result.risks || []).map((risk, i) => (
+                    {/* FIXED: Renamed risks to validation.issues and mapped over impact field to correctly display detected risks */}
+                    {(result.validation.issues || []).map((issue, i) => (
                       <li key={i} className="text-xs text-slate-600 flex gap-2">
-                        <div className="w-1 h-1 bg-slate-300 rounded-full mt-1.5"></div> {risk}
+                        <div className="w-1 h-1 bg-slate-300 rounded-full mt-1.5"></div> {issue.impact}
                       </li>
                     ))}
                  </ul>

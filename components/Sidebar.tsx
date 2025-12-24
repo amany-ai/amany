@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { LayoutDashboard, CheckCircle, Users, ShieldAlert, Share2, Bell, Calculator, BookOpen, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, Users, ShieldAlert, Share2, Bell, Calculator, BookOpen, ClipboardList } from 'lucide-react';
 import { UserRole, Language } from '../types';
 import { TRANSLATIONS } from '../constants';
 
@@ -15,11 +15,10 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, unreadCount, userRole, language }) => {
   const t = TRANSLATIONS[language];
   
-  // Cleaned up and renamed menu items according to new workflow specifications
   const menuItems = [
-    { id: 'dashboard', label: t.dashboard, icon: <LayoutDashboard size={18} />, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER, UserRole.BA, UserRole.FE_DEV, UserRole.BE_DEV, UserRole.ANDROID_DEV, UserRole.IOS_DEV, UserRole.QA, UserRole.DESIGNER] },
+    { id: 'dashboard', label: t.dashboard, icon: <LayoutDashboard size={18} />, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER, UserRole.BA, UserRole.QA, UserRole.DESIGNER] },
     { id: 'blueprint', label: t.blueprint, icon: <Calculator size={18} />, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER, UserRole.SALES] },
-    { id: 'tasks', label: t.tasks, icon: <ClipboardList size={18} />, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER, UserRole.BA, UserRole.FE_DEV, UserRole.BE_DEV, UserRole.ANDROID_DEV, UserRole.IOS_DEV, UserRole.QA, UserRole.DESIGNER] },
+    { id: 'tasks', label: t.tasks, icon: <ClipboardList size={18} />, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER, UserRole.BA, UserRole.QA] },
     { id: 'resources', label: t.resources, icon: <BookOpen size={18} />, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER] },
     { id: 'employees', label: t.employees, icon: <Users size={18} />, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER] },
     { id: 'integrations', label: t.integrations, icon: <Share2 size={18} />, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER] },
@@ -30,39 +29,39 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, unreadCount,
   const filteredItems = menuItems.filter(item => item.roles.includes(userRole));
 
   return (
-    <div className={`w-64 bg-black h-screen flex flex-col text-slate-400 fixed left-0 border-r top-0 z-50 shadow-2xl border-emerald-900/20 transition-all duration-300 font-inter`}>
-      <div className="p-8 flex flex-col gap-4">
+    <div className="w-64 bg-white h-screen flex flex-col text-slate-500 fixed left-0 border-r border-slate-100 top-0 z-50 transition-all duration-300 font-inter">
+      <div className="p-10 flex flex-col gap-4">
         <div className="group flex flex-col items-center gap-4">
-          <div className="w-full bg-black p-4 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.05)] group-hover:scale-105 transition-all h-16 border border-white/5">
+          <div className="w-full bg-slate-900 p-4 rounded-3xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-all h-20">
              <svg viewBox="0 0 100 100" className="h-full w-full text-white fill-current">
-                <rect x="0" y="0" width="100" height="100" rx="22" fill="black" />
-                <text x="50" y="68" textAnchor="middle" fontSize="52" fontWeight="900" fill="white">Rh</text>
+                <rect x="0" y="0" width="100" height="100" rx="22" fill="#0f172a" />
+                <text x="50" y="68" textAnchor="middle" fontSize="52" fontWeight="900" fill="white">rh</text>
              </svg>
           </div>
           <div className="text-center">
-            <h1 className="text-xl font-black text-white tracking-tighter leading-none lowercase">rowaad</h1>
-            <p className="text-emerald-500 text-[7px] font-black tracking-[0.4em] uppercase mt-1">sovereign os</p>
+            <h1 className="text-lg font-black text-slate-900 tracking-tighter lowercase generous-spacing">rowaad</h1>
+            <p className="text-emerald-500 text-[8px] font-black tracking-[0.4em] uppercase mt-1">sovereign os</p>
           </div>
         </div>
       </div>
 
-      <nav className="flex-1 mt-2 px-4 space-y-2 overflow-y-auto custom-scrollbar">
+      <nav className="flex-1 px-6 space-y-2 overflow-y-auto custom-scrollbar">
         {filteredItems.map((item) => (
           <button
             key={item.id}
             onClick={() => setActiveTab(item.id)}
-            className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 group relative ${
+            className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 group relative ${
               activeTab === item.id 
-                ? 'bg-emerald-600/90 text-white shadow-xl shadow-emerald-900/20' 
-                : 'hover:bg-white/5 hover:text-emerald-400'
+                ? 'bg-slate-900 text-white shadow-xl shadow-slate-900/10' 
+                : 'hover:bg-slate-50 text-slate-400 hover:text-slate-900'
             }`}
           >
-            <div className={`${activeTab === item.id ? 'text-white' : 'text-slate-600 group-hover:text-emerald-500'} transition-colors`}>
+            <div className={`${activeTab === item.id ? 'text-emerald-400' : 'text-slate-300 group-hover:text-slate-900'} transition-colors`}>
               {item.icon}
             </div>
-            <span className="font-bold text-[11px] lowercase tracking-wide word-spacing-tight">{item.label}</span>
+            <span className="font-bold text-[11px] lowercase tracking-tight generous-spacing">{item.label}</span>
             {item.badge !== undefined && item.badge > 0 && (
-               <span className={`ml-auto bg-emerald-500 text-black text-[9px] font-black px-2 py-0.5 rounded-full`}>
+               <span className={`ml-auto bg-emerald-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full`}>
                  {item.badge}
                </span>
             )}
@@ -70,14 +69,14 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, unreadCount,
         ))}
       </nav>
 
-      <div className="p-8 border-t border-white/5 bg-black/40 backdrop-blur-sm">
+      <div className="p-10 border-t border-slate-50 bg-slate-50/30">
          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-emerald-950/40 flex items-center justify-center text-[10px] font-black text-emerald-400 border border-emerald-900/30">
+            <div className="w-10 h-10 rounded-2xl bg-slate-900 flex items-center justify-center text-[11px] font-black text-white border border-slate-800">
               {userRole.substring(0, 1).toLowerCase()}
             </div>
             <div className="overflow-hidden">
-              <p className="text-[10px] font-black text-white truncate lowercase tracking-tight">{userRole}</p>
-              <button onClick={() => window.location.reload()} className="text-[9px] text-emerald-700 font-bold hover:text-emerald-400 transition-colors lowercase">
+              <p className="text-[11px] font-black text-slate-900 truncate lowercase tracking-tighter">{userRole}</p>
+              <button onClick={() => window.location.reload()} className="text-[10px] text-slate-400 font-bold hover:text-emerald-600 transition-colors lowercase tracking-wide">
                 {t.logout}
               </button>
             </div>

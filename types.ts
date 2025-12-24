@@ -28,7 +28,8 @@ export enum UserRole {
   IOS_DEV = 'iOS Developer',
   QA = 'Quality Assurance',
   SALES = 'Sales Department',
-  TEAM_MEMBER = 'Team Member'
+  TEAM_MEMBER = 'Team Member',
+  ACCOUNT_MANAGER = 'Account Manager'
 }
 
 export interface FileAttachment {
@@ -39,37 +40,90 @@ export interface FileAttachment {
   size: number;
 }
 
+export interface IntegrationDetail {
+  vendor: string;
+  type: string;
+  complexity: 'Low' | 'Medium' | 'High';
+  effort_days: number;
+  assumptions: string[];
+}
+
+export interface RoleAllocation {
+  role: string;
+  count: number;
+  rate_monthly: number;
+}
+
+export interface MethodologyOption {
+  type: 'Waterfall' | 'Agile Iterations' | '22-Day Role Model';
+  justification: string;
+  pros: string;
+  cons: string;
+  timeline_adjustment: string;
+}
+
+export interface ValidationIssue {
+  rule: string;
+  severity: 'high' | 'medium' | 'low';
+  impact: string;
+  fix_steps: string[];
+  missing_user_inputs: string[];
+}
+
 export interface EstimationResult {
-  totalDurationDays: number;
-  breakdown: {
+  scope: {
+    project_name: string;
+    domain: string;
+    platforms: string[];
+    user_types: string[];
+    core_modules: string[];
+    complexity: 'Low' | 'Medium' | 'High';
+  };
+  methodology_options: MethodologyOption[];
+  selected_methodology?: string;
+  effort_days: {
     backend: number;
-    admin: number;
-    web: number;
+    dashboard: number;
+    website: number;
     android: number;
     ios: number;
     qa: number;
+    deployment: number;
+    integrations: number;
   };
-  complexity: 'Low' | 'Medium' | 'High';
-  reusableModulesFound: string[];
-  externalIntegrations: string[];
-  risks: string[];
-  justification: string;
-  validationChecklist: string[];
-}
-
-export interface UIDesignResult {
-  typography: {
-    fontFamily: string;
-    letterSpacing: string;
-    wordSpacing: string;
-    caseStyle: 'lowercase' | 'uppercase' | 'normal';
+  duration_working_days: number;
+  team: {
+    BA: number;
+    Backend: number;
+    Frontend: number;
+    Android: number;
+    iOS: number;
+    QA: number;
+    PM: number;
+    AccountManager: number;
   };
-  spacingSystem: string[];
-  components: {
-    name: string;
-    tailwind: string;
-    explanation: string;
-  }[];
+  rates_monthly: Record<string, number>;
+  budget: {
+    monthly_cost: number;
+    project_cost: number;
+    vat_amount: number;
+    total_with_vat: number;
+  };
+  integrations: IntegrationDetail[];
+  export_plan: {
+    method: string;
+    output: string;
+    steps: string[];
+    code_snippet: string;
+  };
+  validation: {
+    status: 'pass' | 'fail';
+    issues: ValidationIssue[];
+  };
+  assumptions: string[];
+  exclusions: string[];
+  next_questions: string[];
+  human_summary?: string;
 }
 
 export interface Project {
@@ -115,16 +169,6 @@ export interface User {
   role: UserRole;
 }
 
-export interface Notification {
-  id: string;
-  source: 'Zoho' | 'Slack' | 'TimeDoctor' | 'GitLab' | 'System';
-  message: string;
-  timestamp: string;
-  read: boolean;
-  type: 'status' | 'alert' | 'system' | 'assignment' | 'deadline';
-  channel?: string;
-}
-
 export interface GitLabUpdate {
   id: string;
   author: string;
@@ -133,26 +177,6 @@ export interface GitLabUpdate {
   timestamp: string;
   linesAdded: number;
   linesRemoved: number;
-}
-
-export interface TestCase {
-  id: string;
-  title: string;
-  platform: 'Android' | 'iOS' | 'Web';
-  status: 'Pass' | 'Fail' | 'Running' | 'Pending';
-  priority: 'Critical' | 'Medium' | 'Low';
-  type: string;
-  lastRun: string;
-  automationScript?: string;
-}
-
-export interface ApiEndpoint {
-  id: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  path: string;
-  status: 'Deployed' | 'Draft' | 'Deprecated';
-  xcodeSynced: boolean;
-  windsurfVerified: boolean;
 }
 
 export interface ResourceAllocation {
@@ -178,27 +202,6 @@ export interface Credential {
   lastUpdated: string;
 }
 
-export interface NotificationSettings {
-  taskAssignments: boolean;
-  deadlineApproaching: boolean;
-  statusChanges: boolean;
-  systemAlerts: boolean;
-}
-
-export interface IntegrationSettings {
-  maxIdleMinutes: number;
-  shiftStartTime: string;
-  slackAlertChannel: string;
-  reportingFrequency: 'Daily' | 'Weekly' | 'Monthly';
-}
-
-export interface ServiceConnection {
-  id: string;
-  name: string;
-  status: 'Connected' | 'Disconnected' | 'Syncing';
-  lastSync: string;
-}
-
 export interface TeamMember {
   id: string;
   name: string;
@@ -210,4 +213,56 @@ export interface TeamMember {
   shiftStartTime: string;
   zohoId?: string;
   timeDoctorId?: string;
+}
+
+export interface Notification {
+  id: string;
+  source: string;
+  message: string;
+  timestamp: string;
+  read: boolean;
+  type: 'status' | 'assignment' | 'deadline' | 'system';
+  channel?: string;
+}
+
+export interface NotificationSettings {
+  taskAssignments: boolean;
+  deadlineApproaching: boolean;
+  statusChanges: boolean;
+  systemAlerts: boolean;
+}
+
+export interface TestCase {
+  id: string;
+  title: string;
+  platform: 'Android' | 'iOS' | 'Web';
+  status: 'Pass' | 'Fail' | 'Running' | 'Pending';
+  priority: 'Critical' | 'High' | 'Medium';
+  lastRun: string;
+  type: string;
+  automationScript?: string;
+}
+
+export interface ApiEndpoint {
+  id: string;
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  path: string;
+  status: 'Draft' | 'Staging' | 'Production';
+  xcodeSynced: boolean;
+  windsurfVerified: boolean;
+}
+
+export interface UIDesignResult {
+  typography?: {
+    fontFamily: string;
+    letterSpacing: string;
+    wordSpacing: string;
+    caseStyle: string;
+  };
+  components: {
+    name: string;
+    tailwind: string;
+    explanation: string;
+  }[];
+  spacingSystem?: string[];
 }

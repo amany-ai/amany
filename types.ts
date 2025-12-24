@@ -54,14 +54,22 @@ export interface EstimationResult {
   externalIntegrations: string[];
   risks: string[];
   justification: string;
+  validationChecklist: string[];
 }
 
-export interface EstimationMethodology {
-  id: string;
-  category: string;
-  task: string;
-  standardHours: number;
-  description: string;
+export interface UIDesignResult {
+  typography: {
+    fontFamily: string;
+    letterSpacing: string;
+    wordSpacing: string;
+    caseStyle: 'lowercase' | 'uppercase' | 'normal';
+  };
+  spacingSystem: string[];
+  components: {
+    name: string;
+    tailwind: string;
+    explanation: string;
+  }[];
 }
 
 export interface Project {
@@ -117,7 +125,6 @@ export interface Notification {
   channel?: string;
 }
 
-// Added missing GitLabUpdate interface
 export interface GitLabUpdate {
   id: string;
   author: string;
@@ -128,7 +135,6 @@ export interface GitLabUpdate {
   linesRemoved: number;
 }
 
-// Added missing TestCase interface
 export interface TestCase {
   id: string;
   title: string;
@@ -140,7 +146,6 @@ export interface TestCase {
   automationScript?: string;
 }
 
-// Added missing ApiEndpoint interface
 export interface ApiEndpoint {
   id: string;
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -150,7 +155,6 @@ export interface ApiEndpoint {
   windsurfVerified: boolean;
 }
 
-// Added missing ResourceAllocation interface
 export interface ResourceAllocation {
   id: string;
   employeeId: string;
@@ -163,7 +167,6 @@ export interface ResourceAllocation {
   comments?: string;
 }
 
-// Added missing Credential interface
 export interface Credential {
   id: string;
   title: string;
@@ -175,7 +178,6 @@ export interface Credential {
   lastUpdated: string;
 }
 
-// Added missing NotificationSettings interface
 export interface NotificationSettings {
   taskAssignments: boolean;
   deadlineApproaching: boolean;
@@ -183,7 +185,6 @@ export interface NotificationSettings {
   systemAlerts: boolean;
 }
 
-// Added missing IntegrationSettings interface
 export interface IntegrationSettings {
   maxIdleMinutes: number;
   shiftStartTime: string;
@@ -191,7 +192,6 @@ export interface IntegrationSettings {
   reportingFrequency: 'Daily' | 'Weekly' | 'Monthly';
 }
 
-// Added missing ServiceConnection interface
 export interface ServiceConnection {
   id: string;
   name: string;
@@ -199,7 +199,6 @@ export interface ServiceConnection {
   lastSync: string;
 }
 
-// Added missing TeamMember interface
 export interface TeamMember {
   id: string;
   name: string;

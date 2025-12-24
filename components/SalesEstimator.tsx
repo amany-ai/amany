@@ -12,8 +12,7 @@ const SalesEstimator: React.FC = () => {
   const handleEstimate = async () => {
     if (!brd) return;
     setLoading(true);
-    // Fixed: Added second argument to estimateSalesFromBRD call
-    const data = await estimateSalesFromBRD(brd, { isPremiumWeb: false, complexity: 'Low' });
+    const data = await estimateSalesFromBRD(brd, { isPremiumWeb: false });
     setResult(data);
     setLoading(false);
   };
@@ -59,12 +58,11 @@ const SalesEstimator: React.FC = () => {
                 <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
                 <p className="font-bold text-slate-900 animate-pulse">AI Estimator is calculating role complexities...</p>
              </div>
-          ) : (
+          ) : result && (
             <div className="space-y-6 animate-in zoom-in-95">
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Total Effort</p>
-                   {/* Fixed: Used totalDurationDays instead of totalHours */}
                    <p className="text-2xl font-black text-slate-900">{result.totalDurationDays} Days</p>
                 </div>
                 <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
@@ -80,13 +78,12 @@ const SalesEstimator: React.FC = () => {
                     <Clock size={18} className="text-amber-400" /> Role Breakdown (Estimated Days)
                  </h3>
                  <div className="space-y-4">
-                    {/* Fixed: Mapped Object.entries of breakdown to correctly display estimated days */}
-                    {Object.entries(result.breakdown).map(([role, days]) => (
+                    {Object.entries(result.breakdown || {}).map(([role, days]) => (
                       <div key={role} className="flex justify-between items-center">
                          <span className="text-sm font-medium text-slate-400 uppercase">{role}</span>
                          <div className="flex items-center gap-4 flex-1 mx-6">
                             <div className="h-1.5 bg-slate-800 rounded-full flex-1">
-                               <div className="h-full bg-blue-500 rounded-full" style={{ width: `${(days / result.totalDurationDays) * 100}%` }}></div>
+                               <div className="h-full bg-blue-500 rounded-full" style={{ width: `${(Number(days) / result.totalDurationDays) * 100}%` }}></div>
                             </div>
                          </div>
                          <span className="text-sm font-bold">{days}d</span>
@@ -100,7 +97,7 @@ const SalesEstimator: React.FC = () => {
                     <ShieldAlert size={16} className="text-amber-500" /> Risk Mitigation
                  </h3>
                  <ul className="space-y-2">
-                    {result.risks.map((risk, i) => (
+                    {(result.risks || []).map((risk, i) => (
                       <li key={i} className="text-xs text-slate-600 flex gap-2">
                         <div className="w-1 h-1 bg-slate-300 rounded-full mt-1.5"></div> {risk}
                       </li>

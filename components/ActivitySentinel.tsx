@@ -7,7 +7,7 @@ const ActivitySentinel: React.FC = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [isIdle, setIsIdle] = useState(false);
   const idleTimeoutRef = useRef<number | null>(null);
-  const IDLE_LIMIT = 5 * 60 * 1000;
+  const IDLE_LIMIT = 5 * 60 * 1000; // 5 minutes
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -42,58 +42,64 @@ const ActivitySentinel: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-[40px] p-8 shadow-2xl relative overflow-hidden group h-full flex flex-col justify-between lowercase-ui">
-      <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-all">
-        <Clock size={120} className="text-white" />
+    <div className="bg-black border border-emerald-900/30 rounded-[32px] p-6 shadow-2xl relative overflow-hidden group">
+      <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+        <Clock size={80} className="text-emerald-500" />
       </div>
       
       <div className="relative z-10">
-        <div className="flex justify-between items-center mb-10">
-          <div className="flex items-center gap-3">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-2">
             <Zap className="text-emerald-500" size={16} />
-            <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest generous-spacing">sentinel node</span>
+            <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Sovereign Sentinel</span>
           </div>
           {isIdle && (
-            <div className="flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded-full text-[9px] font-black uppercase generous-spacing">
-              idle
+            <div className="flex items-center gap-1.5 bg-red-500/20 text-red-400 px-3 py-1 rounded-full border border-red-500/30 animate-pulse">
+              <AlertTriangle size={10} />
+              <span className="text-[9px] font-black uppercase">Idle Node</span>
             </div>
           )}
         </div>
 
-        <div className="mb-10">
-          <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2 generous-spacing">session duration</p>
-          <p className="text-4xl font-black text-white tracking-tighter tabular-nums generous-spacing">{formatTime(activeSeconds)}</p>
+        <div className="mb-6">
+          <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Active Session Progress</p>
+          <p className="text-4xl font-black text-white tracking-tighter tabular-nums">{formatTime(activeSeconds)}</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-3">
           <button 
             onClick={() => setIsPaused(!isPaused)}
-            className={`flex items-center justify-center gap-3 py-4 rounded-2xl transition-all ${
-              isPaused ? 'bg-emerald-600 text-white' : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
+            className={`flex flex-col items-center justify-center py-3 rounded-2xl border transition-all ${
+              isPaused ? 'bg-emerald-600 border-emerald-500 text-white' : 'bg-white/5 border-white/10 text-slate-400 hover:text-white hover:bg-white/10'
             }`}
           >
-            {isPaused ? <Play size={14} /> : <Pause size={14} />}
-            <span className="text-[10px] font-black uppercase generous-spacing">{isPaused ? 'resume' : 'pause'}</span>
+            {isPaused ? <Play size={16} /> : <Pause size={16} />}
+            <span className="text-[8px] font-black uppercase mt-1.5">{isPaused ? 'Resume' : 'Pause'}</span>
           </button>
           
           <button 
             onClick={() => setActiveSeconds(0)}
-            className="flex items-center justify-center gap-3 py-4 bg-white/5 text-slate-400 rounded-2xl hover:text-white hover:bg-white/10 transition-all"
+            className="flex flex-col items-center justify-center py-3 bg-white/5 border border-white/10 text-slate-400 rounded-2xl hover:text-white hover:bg-white/10 transition-all"
           >
-            <RotateCcw size={14} />
-            <span className="text-[10px] font-black uppercase generous-spacing">reset</span>
+            <RotateCcw size={16} />
+            <span className="text-[8px] font-black uppercase mt-1.5">Reset</span>
           </button>
-        </div>
-      </div>
 
-      <div className="relative z-10 pt-8 mt-8 border-t border-white/5">
-         <div className="flex justify-between items-center mb-3">
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest generous-spacing">node efficiency</span>
-            <span className="text-xs font-black text-emerald-500 tracking-tighter">98.4%</span>
-         </div>
-         <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-            <div className="h-full bg-emerald-500 w-[98.4%] shadow-lg"></div>
-         </div>
+          <div className="flex flex-col items-center justify-center py-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-2xl">
+            <ShieldCheck size={16} />
+            <span className="text-[8px] font-black uppercase mt-1.5">Secure</span>
+          </div>
+        </div>
+
+        <div className="mt-6 pt-6 border-t border-white/5">
+           <div className="flex justify-between items-center">
+              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Efficiency Rating</span>
+              <span className="text-xs font-black text-emerald-500">98.4%</span>
+           </div>
+           <div className="w-full h-1 bg-white/5 rounded-full mt-2 overflow-hidden">
+              <div className="h-full bg-emerald-500 w-[98.4%] shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+           </div>
+        </div>
       </div>
     </div>
   );

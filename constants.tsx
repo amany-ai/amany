@@ -11,15 +11,15 @@ export const ROWAD_ESTIMATION_RULES = {
     MEDIUM: 0.10,
     HIGH: 0.20
   },
-  SAUDI_REGULATIONS_NOTICE: "all integrations must comply with saudi commercial and software regulations (nafath, sama, citc).",
+  SAUDI_REGULATIONS_NOTICE: "All integrations must comply with Saudi commercial and software regulations (Nafath, SAMA, CITC).",
   REUSABLE_MODULES: [
-    "users & auth",
-    "address book",
-    "orders management",
-    "wallet & transactions",
-    "notifications hub",
-    "settings & profile",
-    "search & filters"
+    "Users & Auth",
+    "Address Book",
+    "Orders Management",
+    "Wallet & Transactions",
+    "Notifications Hub",
+    "Settings & Profile",
+    "Search & Filters"
   ]
 };
 
@@ -81,11 +81,11 @@ export const WORKFLOW_RULES = {
 };
 
 export const TEAM_MEMBERS: TeamMember[] = [
-  { id: '1', name: 'amany', email: 'amany@rh.net.sa', role: 'admin', userRole: UserRole.ADMIN, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', zohoId: 'Z-001', timeDoctorId: 'TD-001' },
-  { id: '2', name: 'ahmed ba', email: 'ahmed@rh.net.sa', role: 'business analyst', userRole: UserRole.BA, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', zohoId: 'Z-002', timeDoctorId: 'TD-002' },
-  { id: '4', name: 'omar backend', email: 'omar@rh.net.sa', role: 'backend developer', userRole: UserRole.BE_DEV, status: 'Active', projectType: 'Web', shiftStartTime: '09:00', zohoId: 'Z-004', timeDoctorId: 'TD-004' },
-  { id: '5', name: 'khalid android', email: 'khalid@rh.net.sa', role: 'android developer', userRole: UserRole.ANDROID_DEV, status: 'Active', projectType: 'Mobile', shiftStartTime: '09:00', zohoId: 'Z-005', timeDoctorId: 'TD-005' },
-  { id: '7', name: 'sara qa', email: 'sara@rh.net.sa', role: 'quality assurance', userRole: UserRole.QA, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', zohoId: 'Z-007', timeDoctorId: 'TD-007' }
+  { id: '1', name: 'Amany', email: 'amany@rh.net.sa', role: 'Admin', userRole: UserRole.ADMIN, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', zohoId: 'Z-001', timeDoctorId: 'TD-001' },
+  { id: '2', name: 'Ahmed BA', email: 'ahmed@rh.net.sa', role: 'Business Analyst', userRole: UserRole.BA, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', zohoId: 'Z-002', timeDoctorId: 'TD-002' },
+  { id: '4', name: 'Omar Backend', email: 'omar@rh.net.sa', role: 'Backend Developer', userRole: UserRole.BE_DEV, status: 'Active', projectType: 'Web', shiftStartTime: '09:00', zohoId: 'Z-004', timeDoctorId: 'TD-004' },
+  { id: '5', name: 'Khalid Android', email: 'khalid@rh.net.sa', role: 'Android Developer', userRole: UserRole.ANDROID_DEV, status: 'Active', projectType: 'Mobile', shiftStartTime: '09:00', zohoId: 'Z-005', timeDoctorId: 'TD-005' },
+  { id: '7', name: 'Sara QA', email: 'sara@rh.net.sa', role: 'Quality Assurance', userRole: UserRole.QA, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', zohoId: 'Z-007', timeDoctorId: 'TD-007' }
 ];
 
 export const ZOHO_A21_TEMPLATE: Task[] = [

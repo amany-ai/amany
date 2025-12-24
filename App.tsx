@@ -23,15 +23,26 @@ const DEFAULT_NOTIF_SETTINGS: NotificationSettings = {
 };
 
 const MOCK_GIT_FEED: GitLabUpdate[] = [
-  { id: '1', author: 'omar backend', repo: 'backend-laravel-mongo', message: 'feat: add nafath controller and mongodb aggregation', timestamp: '2h ago', linesAdded: 142, linesRemoved: 12 },
-  { id: '2', author: 'sara design', repo: 'design-assets', message: 'sync: update real estate card typography', timestamp: '4h ago', linesAdded: 0, linesRemoved: 0 },
-  { id: '3', author: 'khalid android', repo: 'android-native', message: 'fix: location service permission flow', timestamp: '5h ago', linesAdded: 55, linesRemoved: 4 },
-  { id: '4', author: 'laila ios', repo: 'ios-native', message: 'feat: implement mada payment sheet using swiftui', timestamp: 'yesterday', linesAdded: 310, linesRemoved: 22 },
+  { id: '1', author: 'Omar Backend', repo: 'backend-laravel-mongo', message: 'feat: add nafath controller and mongodb aggregation', timestamp: '2h ago', linesAdded: 142, linesRemoved: 12 },
+  { id: '2', author: 'Sara Design', repo: 'design-assets', message: 'sync: update real estate card typography', timestamp: '4h ago', linesAdded: 0, linesRemoved: 0 },
+  { id: '3', author: 'Khalid Android', repo: 'android-native', message: 'fix: location service permission flow', timestamp: '5h ago', linesAdded: 55, linesRemoved: 4 },
+  { id: '4', author: 'Laila iOS', repo: 'ios-native', message: 'feat: implement mada payment sheet using swiftui', timestamp: 'Yesterday', linesAdded: 310, linesRemoved: 22 },
+];
+
+const INITIAL_ENDPOINTS: ApiEndpoint[] = [
+  { id: '1', method: 'POST', path: '/api/auth/verify', status: 'Deployed', xcodeSynced: true, windsurfVerified: true },
+  { id: '2', method: 'GET', path: '/api/v1/listings', status: 'Deployed', xcodeSynced: true, windsurfVerified: true },
+  { id: '3', method: 'POST', path: '/api/v1/payments', status: 'Draft', xcodeSynced: false, windsurfVerified: true },
 ];
 
 const INITIAL_ALLOCATIONS: ResourceAllocation[] = [
-  { id: '1', employeeId: '4', employeeName: 'omar backend', title: 'backend developer', projectName: 'production portal', taskName: 'laravel api security & mongodb aggregation', startDate: '2025-02-20', endDate: '2025-02-27', comments: 'focusing on moloquent integration' },
-  { id: '2', employeeId: '5', employeeName: 'khalid android', title: 'android developer', projectName: 'production portal', taskName: 'base design coding', startDate: '2025-02-20', endDate: '2025-03-05', comments: 'direct figma sync' }
+  { id: '1', employeeId: '4', employeeName: 'Omar Backend', title: 'Backend Developer', projectName: 'Production Portal', taskName: 'Laravel API Security & MongoDB Aggregation', startDate: '2025-02-20', endDate: '2025-02-27', comments: 'Focusing on Moloquent integration' },
+  { id: '2', employeeId: '5', employeeName: 'Khalid Android', title: 'Android Developer', projectName: 'Production Portal', taskName: 'Base Design Coding', startDate: '2025-02-20', endDate: '2025-03-05', comments: 'Direct figma sync' }
+];
+
+const INITIAL_CREDENTIALS: Credential[] = [
+  { id: 'c1', title: 'GitLab Production Token', type: 'Service Account', environment: 'Production', identifier: 'PM-AUTO-BOT', secretValue: 'glpat-5529kks82910xx-fake', comments: 'Main CI/CD pipeline access', lastUpdated: '2025-02-20' },
+  { id: 'c2', title: 'Internal MongoDB Node', type: 'Database', environment: 'Dev', identifier: 'mongodb_local_admin', secretValue: 'mongodb://127.0.0.1:27017/rowaad_prod', comments: 'Self-hosted internal NoSQL node', lastUpdated: '2025-02-22' }
 ];
 
 const DEFAULT_PROJECT: Project = {
@@ -47,13 +58,13 @@ const DEFAULT_PROJECT: Project = {
   })),
   gitUpdates: MOCK_GIT_FEED,
   testCases: [],
-  endpoints: [],
+  endpoints: INITIAL_ENDPOINTS,
   allocations: INITIAL_ALLOCATIONS,
-  credentials: [],
+  credentials: INITIAL_CREDENTIALS,
   stackInfo: {
-    framework: 'laravel 11',
-    database: 'self-hosted mongodb',
-    version: 'a21 v2.6-internal'
+    framework: 'Laravel 11',
+    database: 'Self-Hosted MongoDB',
+    version: 'A21 v2.6-Internal'
   }
 };
 
@@ -75,8 +86,8 @@ const AppContent: React.FC = () => {
     const newNotif: Notification = {
       id: `NOTIF-${Date.now()}-${Math.random()}`,
       source,
-      message: message.toLowerCase(),
-      timestamp: 'just now',
+      message,
+      timestamp: 'Just now',
       read: false,
       type
     };
@@ -86,7 +97,7 @@ const AppContent: React.FC = () => {
   const handleUpdateTaskStatus = (taskId: string, status: TaskStatus) => {
     const task = project.tasks.find(t => t.id === taskId);
     if (task && task.status !== status) {
-      addNotification(`task "${task.title}" status changed to ${status}`, 'status', 'System');
+      addNotification(`Task "${task.title}" status changed to ${status}`, 'status', 'System');
     }
     setProject(prev => ({
       ...prev,
@@ -166,7 +177,7 @@ const AppContent: React.FC = () => {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="flex bg-[#fdfdfd] min-h-screen font-inter lowercase-ui">
+    <div className={`flex bg-[#fdfdfd] min-h-screen font-inter`}>
       <Sidebar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
@@ -174,39 +185,47 @@ const AppContent: React.FC = () => {
         userRole={currentUser.role} 
         language="en"
       />
-      <main className="flex-1 ml-64 p-6 overflow-x-hidden transition-all duration-300">
-        <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-100 px-10 py-6 flex justify-between items-center rounded-3xl mb-8 shadow-sm">
+      <main className={`flex-1 ml-64 p-2 overflow-x-hidden transition-all duration-300`}>
+        <header className="sticky top-0 z-40 bg-black backdrop-blur-xl border-b border-white/5 px-10 py-5 flex justify-between items-center rounded-b-[32px] mb-4 shadow-2xl">
           <div className="flex items-center gap-6">
-            <div className="flex flex-col">
-              <h2 className="font-black text-slate-900 tracking-tight text-xl lowercase generous-spacing">
-                 rowaad hub
-              </h2>
-              <span className="text-[9px] text-emerald-500 font-black uppercase tracking-widest mt-1 flex items-center gap-1">
-                 sovereign node <ShieldCheck size={10} />
-              </span>
+            <div className="flex items-center gap-4 group">
+              <div className="h-10 w-10 flex items-center justify-center bg-black rounded-lg group-hover:bg-white transition-all shadow-[0_0_15px_rgba(255,255,255,0.05)] border border-white/10">
+                <svg viewBox="0 0 100 100" className="h-7 w-7 text-white fill-current">
+                   <rect x="0" y="0" width="100" height="100" rx="20" fill="black" />
+                   <text x="50" y="68" textAnchor="middle" fontSize="50" fontWeight="900" fill="white">Rh</text>
+                </svg>
+              </div>
+              <div className="flex flex-col">
+                <h2 className="font-black text-white tracking-tight uppercase text-sm leading-none lowercase">
+                   rowaad hub
+                </h2>
+                <span className="text-[8px] text-emerald-500 font-bold uppercase tracking-widest mt-1 flex items-center gap-1">
+                   sovereign node <ShieldCheck size={8} />
+                </span>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-6">
-             <div className="bg-slate-100 px-5 py-2 rounded-2xl border border-slate-200 flex items-center gap-2">
-                <Command size={14} className="text-slate-400" />
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest lowercase generous-spacing">{t.internal_node}</span>
+          <div className="flex items-center gap-5">
+             <div className="bg-emerald-950/20 px-4 py-1.5 rounded-full border border-emerald-900/30 flex items-center gap-2">
+                <Command size={12} className="text-emerald-500" />
+                <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest lowercase">{t.internal_node}</span>
              </div>
-             <div className="text-right">
-                <p className="text-xs font-black text-slate-900 lowercase tracking-tighter">{currentUser.name.toLowerCase()}</p>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] lowercase generous-spacing">{currentUser.role.toLowerCase()}</p>
+             <div className={`text-right`}>
+                <p className="text-xs font-black text-white lowercase tracking-tighter">{currentUser.name.toLowerCase()}</p>
+                <p className="text-[8px] text-emerald-500/70 font-bold uppercase tracking-[0.2em] lowercase">{currentUser.role.toLowerCase()}</p>
              </div>
              <button 
                 onClick={() => setActiveTab('notifications')}
-                className="relative w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center font-black shadow-xl hover:bg-emerald-600 transition-all overflow-hidden"
+                className="relative w-10 h-10 bg-emerald-600 text-white rounded-xl flex items-center justify-center font-black shadow-2xl hover:bg-white hover:text-black transition-all overflow-hidden"
               >
                 {currentUser.name.charAt(0).toLowerCase()}
                 {unreadCount > 0 && (
-                   <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white animate-pulse"></span>
+                   <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-600 rounded-full border-2 border-black animate-pulse"></span>
                 )}
              </button>
           </div>
         </header>
-        <div className="px-4">
+        <div className="p-4">
           {renderContent()}
         </div>
       </main>

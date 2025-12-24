@@ -12,36 +12,27 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #fdfdfd;
-            letter-spacing: -0.01em;
-            word-spacing: 0.05em;
+            background-color: #f8fafc;
         }
-        
-        /* Global UI Expert Aesthetics */
-        .lowercase-ui {
-            text-transform: lowercase;
-        }
-        
-        .generous-spacing {
-            word-spacing: 0.15em;
-        }
-
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #f1f5f9;
+            background: #000000;
         }
         ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
+            background: #10b981;
+            border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+            background: #059669;
         }
-        
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 4px;
+        .rowaad-gradient {
+            background: linear-gradient(135deg, #000000 0%, #064e3b 100%);
+        }
+        .rowaad-glass {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(12px);
         }
     </style>
 <script type="importmap">
@@ -58,7 +49,7 @@
 }
 </script>
 </head>
-<body class="lowercase-ui">
+<body>
     <div id="root"></div>
 </body>
 </html>

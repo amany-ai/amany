@@ -40,6 +40,40 @@ export interface FileAttachment {
   size: number;
 }
 
+// Planner Mesh Specific Types
+export interface PlannerAllocation {
+  id: string;
+  memberId: string;
+  memberName: string;
+  hours: number;
+  project: string;
+  priority: 'High' | 'Medium' | 'Low';
+  isOverCapacity: boolean;
+}
+
+export interface PlannerSyncStatus {
+  lastSync: string;
+  status: 'active' | 'syncing' | 'failed';
+  deltaCount: number;
+  mappingGaps: number;
+}
+
+export interface AuditFinding {
+  id: string;
+  agent: string;
+  severity: 'Critical' | 'Warning' | 'Info';
+  message: string;
+  fixSteps: string[];
+}
+
+export interface PortfolioHealth {
+  pmName: string;
+  score: number;
+  utilization: number;
+  missedDeadlines: number;
+  blockers: number;
+}
+
 export interface IntegrationDetail {
   vendor: string;
   type: string;

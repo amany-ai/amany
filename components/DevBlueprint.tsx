@@ -40,7 +40,8 @@ const DevBlueprint: React.FC = () => {
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    files.forEach(file => {
+    // // Fix: Explicitly type 'file' as File to avoid 'unknown' type errors and ensure compatibility with Blob parameters
+    files.forEach((file: File) => {
       const reader = new FileReader();
       reader.onload = () => {
         setAttachments(prev => [...prev, {

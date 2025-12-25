@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { LayoutDashboard, Users, ShieldAlert, Share2, Bell, Calculator, BookOpen, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, Users, ShieldAlert, Share2, Bell, Calculator, BookOpen, ClipboardList, Briefcase } from 'lucide-react';
 import { UserRole, Language } from '../types';
 import { TRANSLATIONS } from '../constants';
 
@@ -18,8 +18,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, unreadCount,
   const menuItems = [
     { id: 'dashboard', label: t.dashboard, icon: <LayoutDashboard size={18} />, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER, UserRole.BA, UserRole.QA, UserRole.DESIGNER] },
     { id: 'blueprint', label: t.blueprint, icon: <Calculator size={18} />, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER, UserRole.SALES] },
+    { id: 'planner', label: 'planner mesh', icon: <Briefcase size={18} />, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER] },
     { id: 'tasks', label: t.tasks, icon: <ClipboardList size={18} />, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER, UserRole.BA, UserRole.QA] },
-    { id: 'resources', label: t.resources, icon: <BookOpen size={18} />, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER] },
     { id: 'employees', label: t.employees, icon: <Users size={18} />, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER] },
     { id: 'integrations', label: t.integrations, icon: <Share2 size={18} />, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER] },
     { id: 'notifications', label: t.notifications, icon: <Bell size={18} />, badge: unreadCount, roles: [UserRole.ADMIN, UserRole.PROJECT_MANAGER, UserRole.QA] },

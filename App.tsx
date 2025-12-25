@@ -11,6 +11,7 @@ import DevBlueprint from './components/DevBlueprint';
 import ResourcePlanner from './components/ResourcePlanner';
 import EmployeeManagement from './components/EmployeeManagement';
 import AIAssistant from './components/AIAssistant';
+import PlannerMesh from './components/PlannerMesh';
 import Login from './components/Login';
 import { ZOHO_A21_TEMPLATE, TRANSLATIONS } from './constants';
 import { ShieldCheck, Command } from 'lucide-react';
@@ -104,6 +105,7 @@ const AppContent: React.FC = () => {
     switch (activeTab) {
       case 'dashboard': return <Dashboard project={project} language="en" />;
       case 'blueprint': return <DevBlueprint />;
+      case 'planner': return <PlannerMesh />;
       case 'tasks': return (
         <ZohoTasks 
           project={project} 

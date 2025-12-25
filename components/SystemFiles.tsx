@@ -14,63 +14,49 @@ const SystemFiles: React.FC<SystemFilesProps> = ({ language }) => {
   const t = TRANSLATIONS[language];
 
   const ENV_BACKEND = `
-# ROWAAD SOVEREIGN OS - LARAVEL BACKEND CONFIG
-APP_NAME="Rowaad Sovereign"
-APP_ENV=production
-APP_KEY=base64:${btoa(Math.random().toString()).substring(0, 32)}
-APP_DEBUG=false
-APP_URL=http://internal.node.local
+# ROWAAD SOVEREIGN OS - NODE.JS BACKEND CONFIG
+PORT=8080
+NODE_ENV=production
+JWT_SECRET=${btoa(Math.random().toString()).substring(0, 32)}
 
-# INTERNAL MONGODB NODE (SELF-HOSTED)
-DB_CONNECTION=mongodb
-DB_HOST=127.0.0.1
-DB_PORT=27017
-DB_DATABASE=rowaad_production
-DB_USERNAME=admin_node
-DB_PASSWORD=local_secure_pass
-DB_AUTHENTICATION_DATABASE=admin
+# MONGODB ATLAS NODE (CLOUD)
+MONGODB_URI="mongodb+srv://admin:<password>@cluster0.atlas.mongodb.net/rowaad_prod"
 
 # EXTERNAL SYSTEM API LINKS
-ZOHO_API_BASE_URL=https://projectsapi.zoho.com/restapi/portal/rhnetsa
+ZOHO_API_URL=https://projectsapi.zoho.com/restapi/portal/rhnetsa
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
-TIME_DOCTOR_API_URL=https://api2.timedoctor.com/v1.1
+TIME_DOCTOR_URL=https://api2.timedoctor.com/v1.1
 
 # INTEGRATION CREDENTIALS
-ZOHO_CLIENT_ID=zoho_id_...
-ZOHO_CLIENT_SECRET=zoho_secret_...
-TIME_DOCTOR_API_KEY=td_key_...
+ZOHO_WEBHOOK_TOKEN=zpsrF3qTxKfnMFD4mGt2o0pyi5bYPvFEzsiDHx8YEFH4rqiV9BzzyUOoxn9RXFFL8ZxrATyf03AwR
+TIME_DOCTOR_KEY=td_key_...
 
 # AI ENGINE CONFIGURATION (GEMINI)
-GEMINI_API_KEY=your_gemini_api_key_here
+API_KEY=your_gemini_api_key_here
   `.trim();
 
   const ENV_FRONTEND = `
 # ROWAAD SOVEREIGN OS - REACT FRONTEND CONFIG
-VITE_API_BASE_URL=http://internal.node.local/api
-VITE_SYSTEM_VERSION=A21-v2.6
-VITE_INTERNAL_NODE_ID=NODE-001
-
-# AI SERVICES (Exclusively for internal dev nodes)
-VITE_GEMINI_API_KEY=your_gemini_api_key_here
+VITE_API_URL=http://api.node.local
+VITE_SYSTEM_VERSION=A21-v3.0-atlas
+VITE_NODE_ID=NODE-ATLAS-001
   `.trim();
 
-  const LARAVEL_DATABASE_CONFIG = `
-<?php
-// config/database.php (MongoDB Moloquent Config)
+  const NODE_MONGO_CONFIG = `
+// config/database.js
+import mongoose from 'mongoose';
 
-'connections' => [
-    'mongodb' => [
-        'driver' => 'mongodb',
-        'host' => env('DB_HOST', '127.0.0.1'),
-        'port' => env('DB_PORT', 27017),
-        'database' => env('DB_DATABASE', 'rowaad'),
-        'username' => env('DB_USERNAME', ''),
-        'password' => env('DB_PASSWORD', ''),
-        'options' => [
-            'database' => env('DB_AUTHENTICATION_DATABASE', 'admin'),
-        ],
-    ],
-],
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.MONGODB_URI);
+    console.log(\`Atlas Connected: \${conn.connection.host}\`);
+  } catch (error) {
+    console.error(\`Atlas Error: \${error.message}\`);
+    process.exit(1);
+  }
+};
+
+export default connectDB;
   `.trim();
 
   const FRONTEND_GEMINI_SERVICE = `
@@ -107,7 +93,7 @@ export const analyzeSRS = async (content: string) => {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto animate-in fade-in duration-500">
+    <div className="p-8 max-w-7xl auto animate-in fade-in duration-500">
       <header className="mb-10 flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-black text-slate-900 flex items-center gap-4 tracking-tighter uppercase">
@@ -152,20 +138,18 @@ export const analyzeSRS = async (content: string) => {
                      <div className="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center">
                         <Database size={16} />
                      </div>
-                     <span className="text-[11px] font-black text-slate-800 uppercase tracking-widest">{t.env_backend}</span>
+                     <span className="text-[11px] font-black text-slate-800 uppercase tracking-widest">.env (Backend)</span>
                   </div>
                   <div className="flex gap-2">
                     <button 
                       onClick={() => handleDownload(ENV_BACKEND, 'backend.env')}
                       className="p-2 text-slate-400 hover:text-emerald-500 transition-colors"
-                      title={t.download_env}
                     >
                       <Download size={16} />
                     </button>
                     <button 
                       onClick={() => handleCopy(ENV_BACKEND, 'be-env')}
                       className="p-2 text-slate-400 hover:text-emerald-500 transition-colors"
-                      title={t.copy_env}
                     >
                       {copied === 'be-env' ? <Check size={16} /> : <Copy size={16} />}
                     </button>
@@ -184,20 +168,18 @@ export const analyzeSRS = async (content: string) => {
                      <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
                         <Layout size={16} />
                      </div>
-                     <span className="text-[11px] font-black text-slate-800 uppercase tracking-widest">{t.env_frontend}</span>
+                     <span className="text-[11px] font-black text-slate-800 uppercase tracking-widest">.env (Frontend)</span>
                   </div>
                   <div className="flex gap-2">
                     <button 
                       onClick={() => handleDownload(ENV_FRONTEND, 'frontend.env')}
                       className="p-2 text-slate-400 hover:text-blue-500 transition-colors"
-                      title={t.download_env}
                     >
                       <Download size={16} />
                     </button>
                     <button 
                       onClick={() => handleCopy(ENV_FRONTEND, 'fe-env')}
                       className="p-2 text-slate-400 hover:text-blue-500 transition-colors"
-                      title={t.copy_env}
                     >
                       {copied === 'fe-env' ? <Check size={16} /> : <Copy size={16} />}
                     </button>
@@ -215,32 +197,32 @@ export const analyzeSRS = async (content: string) => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in slide-in-from-bottom-4 duration-500">
            <div className="lg:col-span-1 bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm h-fit">
               <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-6 flex items-center gap-2">
-                <Folder size={14} className="text-emerald-500" /> Laravel 11 Structure
+                <Folder size={14} className="text-emerald-500" /> Node.js Atlas Structure
               </h3>
               <div className="space-y-3">
                  <div className="flex items-center gap-2 text-sm text-slate-600 font-bold hover:text-emerald-600 cursor-pointer">
-                    <Folder size={16} /> app/
+                    <Folder size={16} /> src/
                  </div>
                  <div className="flex items-center gap-2 text-sm text-slate-400 font-bold ml-6">
-                    <Folder size={16} /> Http/Controllers/
+                    <Folder size={16} /> controllers/
                  </div>
                  <div className="flex items-center gap-2 text-sm text-slate-400 font-bold ml-6">
-                    <Folder size={16} /> Models/ (Moloquent)
+                    <Folder size={16} /> models/ (Mongoose)
                  </div>
                  <div className="flex items-center gap-2 text-sm text-slate-600 font-bold hover:text-emerald-600 cursor-pointer">
                     <Folder size={16} /> config/
                  </div>
                  <div className="flex items-center gap-2 text-sm text-emerald-600 font-black ml-6">
-                    <FileIcon size={16} /> database.php
+                    <FileIcon size={16} /> database.js
                  </div>
                  <div className="flex items-center gap-2 text-sm text-slate-600 font-bold hover:text-emerald-600 cursor-pointer">
                     <Folder size={16} /> routes/
                  </div>
                  <div className="flex items-center gap-2 text-sm text-emerald-600 font-black ml-6">
-                    <FileIcon size={16} /> api.php
+                    <FileIcon size={16} /> api.js
                  </div>
                  <div className="flex items-center gap-2 text-sm text-slate-600 font-bold hover:text-emerald-600 cursor-pointer">
-                    <FileIcon size={16} /> artisan
+                    <FileIcon size={16} /> server.js
                  </div>
               </div>
            </div>
@@ -248,16 +230,16 @@ export const analyzeSRS = async (content: string) => {
            <div className="lg:col-span-2 space-y-6">
               <div className="bg-black rounded-[32px] overflow-hidden shadow-2xl border border-emerald-900/30">
                  <div className="p-6 border-b border-emerald-900/30 bg-emerald-950/20 flex justify-between items-center">
-                    <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">config/database.php</span>
+                    <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">config/database.js</span>
                     <button 
-                      onClick={() => handleCopy(LARAVEL_DATABASE_CONFIG, 'be-db')}
+                      onClick={() => handleCopy(NODE_MONGO_CONFIG, 'be-db')}
                       className="p-2 text-slate-400 hover:text-emerald-500"
                     >
                       {copied === 'be-db' ? <Check size={14} /> : <Copy size={14} />}
                     </button>
                  </div>
                  <div className="p-8 text-slate-300 font-mono text-[11px] leading-relaxed overflow-x-auto h-[400px] custom-scrollbar">
-                    <pre>{LARAVEL_DATABASE_CONFIG}</pre>
+                    <pre>{NODE_MONGO_CONFIG}</pre>
                  </div>
               </div>
            </div>

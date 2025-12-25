@@ -36,7 +36,7 @@ const PlannerMesh: React.FC = () => {
 
   // Mock Data - Only Zoho for Planner Agent
   const syncs: Record<string, PlannerSyncStatus> = {
-    zoho: { lastSync: 'Real-time (Webhook)', status: 'active', deltaCount: 142, mappingGaps: 0 }
+    zoho: { lastSync: 'Real-time (Atlas)', status: 'active', deltaCount: 142, mappingGaps: 0 }
   };
 
   const allocations: PlannerAllocation[] = [
@@ -60,7 +60,7 @@ const PlannerMesh: React.FC = () => {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto animate-in fade-in duration-500 font-inter lowercase-ui">
+    <div className="p-8 max-w-7xl auto animate-in fade-in duration-500 font-inter lowercase-ui">
       <header className="mb-10 flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-black text-slate-900 flex items-center gap-3 tracking-tighter lowercase">
@@ -242,40 +242,27 @@ const PlannerMesh: React.FC = () => {
         <div className="space-y-8 animate-in slide-in-from-right-4">
            <div className="bg-white border border-slate-200 rounded-[32px] p-10 shadow-sm">
               <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-10 flex items-center gap-2">
-                 <Terminal size={20} className="text-indigo-500" /> Implementation Blueprint (PHP 8.2+ Laravel 11)
+                 <Terminal size={20} className="text-indigo-500" /> Implementation Blueprint (Node.js + Atlas)
               </h4>
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
                  <div className="space-y-6">
                     <div>
-                       <h5 className="text-[11px] font-black text-indigo-600 uppercase tracking-[0.2em] mb-4">A. Moloquent Models (MongoDB)</h5>
+                       <h5 className="text-[11px] font-black text-indigo-600 uppercase tracking-[0.2em] mb-4">A. Mongoose Schemas (Atlas)</h5>
                        <div className="bg-slate-950 p-6 rounded-[24px] border border-white/5 font-mono text-[11px] text-slate-300 overflow-x-auto h-[400px] custom-scrollbar">
-<pre className="text-indigo-300">{`<?php
+<pre className="text-indigo-300">{`// models/Task.js
+import mongoose from 'mongoose';
 
-namespace App\\Models;
+const TaskSchema = new mongoose.Schema({
+    zoho_id: { type: String, unique: true },
+    title: String,
+    owner_id: String,
+    priority: { type: String, enum: ['High', 'Medium', 'Low'] },
+    planned_hours: Number,
+    sync_source: String,
+    due_date: Date
+}, { timestamps: true });
 
-use MongoDB\\Laravel\\Eloquent\\Model;
-
-class Task extends Model
-{
-    protected $connection = 'mongodb';
-    protected $collection = 'tasks';
-
-    protected $fillable = [
-        'zoho_id', 
-        'title', 
-        'owner_id', 
-        'priority', 
-        'planned_hours',
-        'sync_source'
-    ];
-
-    /**
-     * Cast NoSQL date nodes
-     */
-    protected $casts = [
-        'due_date' => 'datetime'
-    ];
-}
+export default mongoose.model('Task', TaskSchema);
 `}</pre>
                        </div>
                     </div>
@@ -283,43 +270,31 @@ class Task extends Model
 
                  <div className="space-y-6">
                     <div>
-                       <h5 className="text-[11px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-4">B. Webhook & Slack Logic</h5>
+                       <h5 className="text-[11px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-4">B. Allocation Service Logic</h5>
                        <div className="bg-slate-950 p-6 rounded-[24px] border border-white/5 font-mono text-[11px] text-slate-300 overflow-x-auto h-[400px] custom-scrollbar">
-<pre className="text-emerald-300">{`<?php
+<pre className="text-emerald-300">{`// services/plannerService.js
+import Task from '../models/Task.js';
 
-namespace App\\Services;
+export const generateWeeklyPlan = async (userIds) => {
+    // Aggregation pipeline for Atlas
+    const plan = await Task.aggregate([
+        { $match: { owner_id: { $in: userIds }, status: 'OPEN' } },
+        { 
+            $group: { 
+                _id: "$owner_id", 
+                totalHours: { $sum: "$planned_hours" },
+                tasks: { $push: "$$ROOT" }
+            } 
+        }
+    ]);
 
-use App\\Models\\Task;
-use Illuminate\\Support\\Facades\\Http;
-
-class PlannerService
-{
-    /**
-     * Agent 1: Real-time Webhook Persistence
-     * Target: /api/webhooks/zoho/${ZOHO_WEBHOOK_ENDPOINT}
-     */
-    public function handleZohoWebhook(array $data)
-    {
-        return Task::updateOrCreate(
-            ['zoho_id' => $data['id']],
-            [
-                'title' => $data['name'],
-                'sync_source' => 'webhook_realtime'
-            ]
-        );
-    }
-
-    /**
-     * Push to Slack Channel C0A5X58AEKB
-     */
-    public function pushPlanToSlack(array $plan)
-    {
-        return Http::post(config('services.slack.webhook'), [
-            'channel' => 'C0A5X58AEKB',
-            'blocks' => $this->buildBlockKit($plan)
-        ]);
-    }
-}
+    return plan.map(p => ({
+        user_id: p._id,
+        total_hours: p.totalHours,
+        is_over_capacity: p.totalHours > 40,
+        tasks: p.tasks
+    }));
+};
 `}</pre>
                        </div>
                     </div>
@@ -329,24 +304,24 @@ class PlannerService
 
            <div className="bg-slate-900 rounded-[32px] p-10 text-white border border-indigo-900/30">
               <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-10 flex items-center gap-2">
-                 <Cpu size={20} /> Sovereign Architecture (Laravel 11)
+                 <Cpu size={20} /> Sovereign Architecture (Node.js Atlas)
               </h4>
               <div className="bg-black/50 p-8 rounded-[24px] border border-white/5 font-mono text-[11px] text-indigo-300">
 <pre>{`{
-  "stack": "Laravel 11 + MongoDB Atlas",
-  "auth": "JWT Internal Node Protocol",
+  "stack": "Node.js (Express) + MongoDB Atlas",
+  "auth": "JWT Protocol Node",
   "webhooks": {
-    "zoho_endpoint": "zpsrF3qTxKfnMFD4mGt2o0pyi5bYPvFEzsiDHx8YEFH4rqiV9BzzyUOoxn9RXFFL8ZxrATyf03AwR",
-    "persistence": "moloquent_upsert"
+    "zoho_endpoint": "${ZOHO_WEBHOOK_ENDPOINT}",
+    "persistence": "mongoose_upsert"
   },
   "slack_node": {
     "target_channel": "C0A5X58AEKB",
-    "protocol": "Block Kit v2.0"
+    "protocol": "Webhooks v2"
   },
   "laws": {
     "capacity_hours": 40,
     "support_reserve_pct": 0.10,
-    "db_driver": "mongodb-moloquent"
+    "db_driver": "mongoose"
   }
 }`}</pre>
               </div>

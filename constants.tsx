@@ -12,7 +12,7 @@ export const WORKFLOW_RULES = {
     "unit tests passing in local node",
     "gitlab commit message follows a21 standards",
     "api documentation updated in bridge",
-    "security scan passed (artisan audit)",
+    "security scan passed (npm audit)",
     "figma design verified for mobile/web parity"
   ]
 };
@@ -72,7 +72,12 @@ export const TRANSLATIONS: Record<Language, any> = {
     stack_vitality: 'stack vitality',
     gitlab_pulse: 'gitlab pulse',
     day: 'day',
-    logout: 'logout'
+    logout: 'logout',
+    system_files: 'system files',
+    env_backend: '.env (backend)',
+    env_frontend: '.env (frontend)',
+    download_env: 'download .env',
+    copy_env: 'copy .env'
   },
   ar: {
     dashboard: 'لوحة القيادة',
@@ -91,7 +96,12 @@ export const TRANSLATIONS: Record<Language, any> = {
     stack_vitality: 'حيوية الموارد',
     gitlab_pulse: 'نبض GitLab',
     day: 'يوم',
-    logout: 'تسجيل الخروج'
+    logout: 'تسجيل الخروج',
+    system_files: 'ملفات النظام',
+    env_backend: '.env (الخلفية)',
+    env_frontend: '.env (الواجهة)',
+    download_env: 'تحميل .env',
+    copy_env: 'نسخ .env'
   }
 };
 

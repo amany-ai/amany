@@ -30,7 +30,7 @@ const Integrations: React.FC<IntegrationsProps> = () => {
   ];
 
   return (
-    <div className="p-8 max-w-7xl mx-auto animate-in fade-in duration-500 font-inter lowercase-ui">
+    <div className="p-8 max-w-7xl auto animate-in fade-in duration-500 font-inter lowercase-ui">
       <header className="mb-10 flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-black text-slate-900 flex items-center gap-3 tracking-tighter lowercase">
@@ -104,12 +104,12 @@ const Integrations: React.FC<IntegrationsProps> = () => {
                </div>
                <div className="relative z-10">
                   <h4 className="text-emerald-400 text-[10px] font-black uppercase tracking-[0.3em] mb-4">Agent Logic Console</h4>
-                  <h3 className="text-3xl font-black tracking-tighter mb-8 lowercase">Laravel API Handshake Logic</h3>
+                  <h3 className="text-3xl font-black tracking-tighter mb-8 lowercase">Node.js API Handshake Logic</h3>
                   <div className="space-y-6">
                      {[
-                       { rule: "Webhook Persistence", desc: "Zoho Webhook (zpsrF3...) events are prioritized for real-time task mapping in the Moloquent layer." },
-                       { rule: "JWT Node Auth", desc: "Internal API calls require a Bearer token issued by the Laravel 11 authentication node." },
-                       { rule: "Nafath Gateway", desc: "Identity verification is synchronized via the Nafath OAuth2 bridge before project access." }
+                       { rule: "Webhook Persistence", desc: "Zoho Webhook events are prioritized for real-time task mapping in the Mongoose layer." },
+                       { rule: "JWT Auth Node", desc: "Internal API calls require a Bearer token issued by the Node.js authentication node." },
+                       { rule: "MongoDB Atlas Node", desc: "Data is normalized and persisted to MongoDB Atlas clusters for distributed access." }
                      ].map((logic, i) => (
                        <div key={i} className="flex gap-6 items-start">
                           <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0 text-emerald-400 font-black text-xs">{i+1}</div>
@@ -133,7 +133,7 @@ const Integrations: React.FC<IntegrationsProps> = () => {
                    <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
                       <p className="text-xs font-black text-emerald-900 lowercase">Event: Task_Created</p>
                       <p className="text-[10px] text-emerald-700 italic mt-1">Source: Webhook Endpoint {ZOHO_WEBHOOK_ID.substring(0, 8)}...</p>
-                      <div className="mt-2 text-[9px] font-bold text-emerald-600 bg-white/50 px-2 py-1 rounded-lg">Mapped to MongoDB in 14ms</div>
+                      <div className="mt-2 text-[9px] font-bold text-emerald-600 bg-white/50 px-2 py-1 rounded-lg">Mapped to Atlas in 12ms</div>
                    </div>
                 </div>
              </div>
@@ -141,11 +141,11 @@ const Integrations: React.FC<IntegrationsProps> = () => {
              <div className="bg-emerald-600 rounded-[32px] p-8 text-white shadow-xl shadow-emerald-500/20">
                 <h4 className="text-[10px] font-black text-white/70 uppercase tracking-widest mb-4">Node Health</h4>
                 <div className="flex justify-between items-end">
-                   <p className="text-4xl font-black tracking-tighter">99.8%</p>
-                   <span className="text-[10px] font-bold uppercase mb-1">Webhook Connectivity</span>
+                   <p className="text-4xl font-black tracking-tighter">99.9%</p>
+                   <span className="text-[10px] font-bold uppercase mb-1">Atlas Connectivity</span>
                 </div>
                 <div className="mt-6 h-1 w-full bg-white/20 rounded-full">
-                   <div className="h-full bg-white w-[99.8%]"></div>
+                   <div className="h-full bg-white w-[99.9%]"></div>
                 </div>
              </div>
           </div>
@@ -157,89 +157,76 @@ const Integrations: React.FC<IntegrationsProps> = () => {
           <div className="bg-white border border-slate-200 rounded-[32px] p-10 shadow-sm">
             <header className="flex justify-between items-end mb-10 border-b pb-8">
               <div>
-                <h3 className="text-2xl font-black text-slate-900 tracking-tighter lowercase">Agent 1: Zoho Webhook Controller</h3>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 tracking-widest">Laravel 11 Handler for Event zpsrF3...</p>
+                <h3 className="text-2xl font-black text-slate-900 tracking-tighter lowercase">Agent 1: Node.js Webhook Handler</h3>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 tracking-widest">Express.js Handler for Event zpsrF3...</p>
               </div>
               <div className="flex gap-2">
-                <span className="bg-slate-100 text-slate-600 text-[10px] font-black px-4 py-1.5 rounded-full uppercase">php 8.2+</span>
-                <span className="bg-emerald-100 text-emerald-600 text-[10px] font-black px-4 py-1.5 rounded-full uppercase">laravel 11</span>
+                <span className="bg-slate-100 text-slate-600 text-[10px] font-black px-4 py-1.5 rounded-full uppercase">node 20+</span>
+                <span className="bg-emerald-100 text-emerald-600 text-[10px] font-black px-4 py-1.5 rounded-full uppercase">mongoose</span>
               </div>
             </header>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
               <div className="space-y-6">
                 <h4 className="text-[11px] font-black text-indigo-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                   <Database size={16} /> A. Webhook Receiver Logic
+                   <Database size={16} /> A. Webhook Controller (Express)
                 </h4>
                 <div className="bg-slate-950 p-6 rounded-[24px] border border-white/5 font-mono text-[11px] text-slate-300 overflow-x-auto h-[450px] custom-scrollbar">
-<pre className="text-emerald-400">{`<?php
+<pre className="text-emerald-400">{`// controllers/zohoWebhook.js
+import Task from '../models/Task.js';
 
-namespace App\\Http\\Controllers\\Api;
+export const handleZohoWebhook = async (req, res) => {
+  const { task } = req.body;
+  
+  try {
+    // Mongoose Real-time Persistence to Atlas
+    const updatedTask = await Task.findOneAndUpdate(
+      { zoho_id: task.id },
+      { 
+        title: task.name,
+        owner_email: task.owner,
+        status: task.status_node,
+        sync_source: 'webhook_atlas'
+      },
+      { upsert: true, new: true }
+    );
 
-use App\\Http\\Controllers\\Controller;
-use Illuminate\\Http\\Request;
-use App\\Models\\Task;
-
-class ZohoWebhookController extends Controller
-{
-    /**
-     * Handle Zoho Webhook Events
-     * Endpoint: /api/webhooks/zoho/${ZOHO_WEBHOOK_ID}
-     */
-    public function handle(Request $request)
-    {
-        $payload = $request->json()->all();
-        
-        // Validation of Zoho-Specific Signature
-        if (!$this->isValidSignature($request)) {
-            return response()->json(['error' => 'invalid_node'], 403);
-        }
-
-        $taskData = $payload['task'];
-
-        // Moloquent Real-time Persistence
-        Task::updateOrCreate(
-            ['zoho_id' => $taskData['id']],
-            [
-                'title' => $taskData['name'],
-                'owner_email' => $taskData['owner'],
-                'status' => $taskData['status_node'],
-                'sync_source' => 'webhook'
-            ]
-        );
-
-        return response()->json(['status' => 'acknowledged']);
-    }
-}
+    res.status(200).json({ status: 'acknowledged', id: updatedTask._id });
+  } catch (err) {
+    res.status(500).json({ error: 'atlas_write_fail' });
+  }
+};
 `}</pre>
                 </div>
               </div>
 
               <div className="space-y-6">
                 <h4 className="text-[11px] font-black text-blue-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                   <Clock size={16} /> B. Event Mapping Engine
+                   <Clock size={16} /> B. Data Mapping Service
                 </h4>
                 <div className="bg-slate-950 p-6 rounded-[24px] border border-white/5 font-mono text-[11px] text-slate-300 overflow-x-auto h-[450px] custom-scrollbar">
-<pre className="text-blue-300">{`<?php
+<pre className="text-blue-300">{`// services/mappingAgent.js
+import axios from 'axios';
 
-namespace App\\Services;
+export const processZohoEvent = async (payload) => {
+  // 1. Audit Log to Atlas
+  await AuditLog.create({
+    event: 'zoho_webhook',
+    payload,
+    timestamp: new Date()
+  });
 
-class ZohoMappingAgent
-{
-    public function processEvent(array $payload)
-    {
-        // 1. Log Raw Payload to MongoDB Audit Collection
-        \\Log::channel('mongodb')->info('Zoho Webhook Recv', $payload);
+  // 2. Dispatch Workload Analysis
+  if (payload.action === 'task_assigned') {
+    await analyzeWorkload(payload.task.owner);
+  }
 
-        // 2. Dispatch to Planner Agent for Overcapacity Check
-        if ($payload['action'] === 'task_assigned') {
-            PlannerOrchestrator::dispatch($payload['task_id']);
-        }
-        
-        // 3. Trigger Slack Notify via Channel C0A5X58AEKB
-        SlackNotifier::send("New Task Node: " . $payload['task']['name']);
-    }
-}
+  // 3. Notify Slack C0A5X58AEKB
+  await axios.post(process.env.SLACK_WEBHOOK, {
+    channel: 'C0A5X58AEKB',
+    text: \`node: \${payload.task.name} initialized\`
+  });
+};
 `}</pre>
                 </div>
               </div>
@@ -255,7 +242,7 @@ class ZohoMappingAgent
                  <Lock size={32} />
               </div>
               <h3 className="text-3xl font-black text-slate-900 tracking-tighter mb-4 lowercase">Sovereign Auth Node</h3>
-              <p className="text-slate-400 font-medium italic mb-12 lowercase">Managing Webhook Tokens and API Nodes.</p>
+              <p className="text-slate-400 font-medium italic mb-12 lowercase">Managing Webhook Tokens and Atlas Clusters.</p>
               
               <div className="space-y-4 text-left">
                  <div className="space-y-2">
@@ -270,7 +257,7 @@ class ZohoMappingAgent
                        />
                     </div>
                  </div>
-                 {['MongoDB Atlas URI', 'Laravel App Key', 'Nafath Client Secret'].map((field) => (
+                 {['MongoDB Atlas Connection URI', 'JWT Secret Key', 'Slack Webhook URL'].map((field) => (
                     <div key={field} className="space-y-2">
                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">{field}</label>
                        <div className="relative group">

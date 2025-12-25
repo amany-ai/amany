@@ -34,12 +34,12 @@ const extractJson = (text: string | undefined) => {
 };
 
 /**
- * AGENT 1: ZOHO SYNC PROMPT (LARAVEL ALIGNED + WEBHOOK PERSISTENCE)
+ * AGENT 1: ZOHO SYNC PROMPT (NODE.JS ALIGNED + ATLAS PERSISTENCE)
  */
 export const buildZohoSyncPrompt = (rawApiResponse: any) => {
   return `
-    PURPOSE: Transform raw Zoho Projects JSON/Webhook data into Sovereign Laravel-ready schema.
-    STACK: Laravel 11 + MongoDB (Moloquent).
+    PURPOSE: Transform raw Zoho Projects JSON/Webhook data into Sovereign Node.js-ready schema.
+    STACK: Node.js (Express) + MongoDB Atlas (Mongoose).
     ENDPOINT: zpsrF3qTxKfnMFD4mGt2o0pyi5bYPvFEzsiDHx8YEFH4rqiV9BzzyUOoxn9RXFFL8ZxrATyf03AwR
     INPUT SCHEMA: Zoho Webhook Payload or REST API Output.
     OUTPUT SCHEMA: 
@@ -51,9 +51,9 @@ export const buildZohoSyncPrompt = (rawApiResponse: any) => {
       ]
     }
     RULES:
-    1. Extract task ID for MongoDB upsert using the specific webhook handshake.
-    2. Normalize all data for PHP 8.2 compatibility.
-    3. prioritize webhook data as real-time source of truth.
+    1. Extract task ID for Mongoose findOneAndUpdate upsert.
+    2. Normalize all data for Node.js ES6+ compatibility.
+    3. Prioritize webhook data as real-time source of truth for Atlas.
   `;
 };
 
@@ -62,7 +62,7 @@ export const buildZohoSyncPrompt = (rawApiResponse: any) => {
  */
 export const buildTimeDoctorSyncPrompt = (timeEntries: any) => {
   return `
-    PURPOSE: Aggregate Time Doctor logs for HR Compliance monitoring via Laravel backend.
+    PURPOSE: Aggregate Time Doctor logs for HR Compliance monitoring via Node.js backend.
     INPUT SCHEMA: Time Doctor entries list.
     OUTPUT SCHEMA:
     {
@@ -97,9 +97,9 @@ export const runAgent3WeeklyPlanner = async (context: { tasks: any[], capacity: 
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const systemInstruction = `
     You are Agent 3 (Weekly Resource Planner). 
-    STACK: Laravel 11 Backend + Moloquent Node.
+    STACK: Node.js Backend + MongoDB Atlas (Mongoose).
     LAWS:
-    1. Focus EXCLUSIVELY on Zoho Projects workload data (REST + Webhook zpsrF3...).
+    1. Focus EXCLUSIVELY on Zoho Projects workload data via Atlas.
     2. Max capacity = 40h/week per resource node.
     3. Reserve 10% for support.
     4. Prioritize tasks due in < 14 days.
@@ -119,7 +119,7 @@ export const runAgent6Audit = async (outputs: any) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const systemInstruction = `
     You are Agent 6 (Audit & Review). 
-    TASK: Validate consistency across Laravel sync (Webhook zpsrF3...) and MongoDB nodes.
+    TASK: Validate consistency across Node.js sync and Atlas database nodes.
     LAWS: No unassigned high-priority tasks, no math errors in cost nodes.
     OUTPUT: JSON { audit_status: "pass"|"fail", violations: array, fixes: array }
   `;
@@ -140,7 +140,7 @@ export const getProjectHealthInsights = async (project: Project): Promise<any> =
       model: 'gemini-3-flash-preview',
       contents: JSON.stringify(project),
       config: { 
-        systemInstruction: "persona: workflow health agent. focus on zoho progress nodes via Laravel 11 API (Webhook zpsrF3... integration). output: { \"statusSummary\": string, \"alerts\": string[] } in JSON.",
+        systemInstruction: "persona: workflow health agent. focus on zoho progress nodes via Node.js API (Atlas cloud integration). output: { \"statusSummary\": string, \"alerts\": string[] } in JSON.",
         responseMimeType: 'application/json'
       }
     });
@@ -152,7 +152,7 @@ export const runInitialScan = async (input: string, files: any[] = []): Promise<
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const systemInstruction = `
     You are Agent A (Scope Extractor) and Agent B (Methodology Selector).
-    Context: Laravel 11 + MongoDB production stack with Zoho Webhook zpsrF3...
+    Context: Node.js (Express) + MongoDB Atlas production stack.
     Output JSON only.
   `;
   const parts = [{ text: input }];
@@ -170,7 +170,7 @@ export const runFullSynthesis = async (params: any): Promise<EstimationResult | 
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const systemInstruction = `
     You are the Rowaad Estimator Mesh Orchestrator. 
-    Design estimations specifically for a PHP 8.2 / Laravel 11 / MongoDB architecture using Zoho Webhook zpsrF3...
+    Design estimations specifically for a Node.js / Express / MongoDB Atlas architecture.
     Output JSON only.
   `;
   try {
@@ -198,7 +198,7 @@ export const processCommandAgent = async (input: string) => {
       model: 'gemini-3-flash-preview',
       contents: input,
       config: {
-        systemInstruction: "you are the command orchestrator agent for the Laravel 11 ecosystem (Webhook zpsrF3... enabled).",
+        systemInstruction: "you are the command orchestrator agent for the Node.js ecosystem (Atlas cluster enabled).",
         tools: [{ functionDeclarations: [navigateFunction] }]
       }
     });
@@ -224,7 +224,7 @@ export const analyzeSRS = async (content: string): Promise<any> => {
       model: 'gemini-3-flash-preview',
       contents: content,
       config: { 
-        systemInstruction: "persona: senior technical auditor agent. Analyze against Laravel 11 best practices. output JSON.",
+        systemInstruction: "persona: senior technical auditor agent. Analyze against Node.js (Express) best practices and MongoDB Atlas indexing. output JSON.",
         responseMimeType: 'application/json'
       }
     });
@@ -239,7 +239,7 @@ export const generateTestSuite = async (srs: string): Promise<any[]> => {
       model: 'gemini-3-flash-preview',
       contents: srs,
       config: {
-        systemInstruction: "persona: QA automation engineer. focus on Laravel API and Native mobile flows. output JSON array.",
+        systemInstruction: "persona: QA automation engineer. focus on Node.js API and Native mobile flows. output JSON array.",
         responseMimeType: 'application/json'
       }
     });
@@ -254,7 +254,7 @@ export const generateApiBlueprint = async (requirement: string): Promise<any> =>
       model: 'gemini-3-flash-preview',
       contents: requirement,
       config: {
-        systemInstruction: "persona: backend architect. generate Laravel 11 PHP models and controllers with Moloquent syntax. output JSON.",
+        systemInstruction: "persona: backend architect. generate Node.js (Express) controllers with Mongoose syntax for Atlas. output JSON.",
         responseMimeType: 'application/json'
       }
     });
@@ -264,7 +264,7 @@ export const generateApiBlueprint = async (requirement: string): Promise<any> =>
 
 export const analyzeFigmaDesign = async (image?: string, link?: string): Promise<any> => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const parts: any[] = [{ text: `Analyze this Figma design for a Laravel 11/Swift ecosystem. ${link || ''}` }];
+  const parts: any[] = [{ text: `Analyze this Figma design for a Node.js/Swift ecosystem. ${link || ''}` }];
   if (image) {
     parts.push({ inlineData: { mimeType: 'image/png', data: image.split(',')[1] || image } });
   }
@@ -273,7 +273,7 @@ export const analyzeFigmaDesign = async (image?: string, link?: string): Promise
       model: 'gemini-2.5-flash-image',
       contents: { parts },
       config: {
-        systemInstruction: "persona: UI/UX engineer. Provide Laravel API route suggestions and Swift view stubs in JSON.",
+        systemInstruction: "persona: UI/UX engineer. Provide Node.js API route suggestions and Swift view stubs in JSON.",
         responseMimeType: 'application/json'
       }
     });
@@ -287,7 +287,7 @@ export const generateWeeklyResourceSummary = async (allocations: any[]): Promise
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: JSON.stringify(allocations),
-      config: { systemInstruction: "summarize this resource plan for the week based on zoho workload via Laravel node (Webhook zpsrF3...)." }
+      config: { systemInstruction: "summarize this resource plan for the week based on zoho workload via Node.js Atlas node." }
     });
     return response.text || "";
   } catch (e) { return ""; }
@@ -300,7 +300,7 @@ export const generateFrontendBlueprint = async (requirement: string): Promise<an
       model: 'gemini-3-flash-preview',
       contents: requirement,
       config: {
-        systemInstruction: "persona: frontend lead. generate components and Tailwind stubs for a Laravel-served API node. output JSON.",
+        systemInstruction: "persona: frontend lead. generate components and Tailwind stubs for a Node-served API node. output JSON.",
         responseMimeType: 'application/json'
       }
     });

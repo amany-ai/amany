@@ -24,14 +24,14 @@ const DEFAULT_NOTIF_SETTINGS: NotificationSettings = {
 };
 
 const MOCK_GIT_FEED: GitLabUpdate[] = [
-  { id: '1', author: 'omar backend', repo: 'backend-laravel-mongo', message: 'feat: add nafath controller and mongodb aggregation', timestamp: '2h ago', linesAdded: 142, linesRemoved: 12 },
+  { id: '1', author: 'omar backend', repo: 'backend-node-atlas', message: 'feat: add nafath controller and mongoose aggregation', timestamp: '2h ago', linesAdded: 142, linesRemoved: 12 },
   { id: '2', author: 'sara design', repo: 'design-assets', message: 'sync: update real estate card typography', timestamp: '4h ago', linesAdded: 0, linesRemoved: 0 },
   { id: '3', author: 'khalid android', repo: 'android-native', message: 'fix: location service permission flow', timestamp: '5h ago', linesAdded: 55, linesRemoved: 4 },
   { id: '4', author: 'laila ios', repo: 'ios-native', message: 'feat: implement mada payment sheet using swiftui', timestamp: 'yesterday', linesAdded: 310, linesRemoved: 22 },
 ];
 
 const INITIAL_ALLOCATIONS: ResourceAllocation[] = [
-  { id: '1', employeeId: '4', employeeName: 'omar backend', title: 'backend developer', projectName: 'production portal', taskName: 'laravel api security & mongodb aggregation', startDate: '2025-02-20', endDate: '2025-02-27', comments: 'focusing on moloquent integration' },
+  { id: '1', employeeId: '4', employeeName: 'omar backend', title: 'backend developer', projectName: 'production portal', taskName: 'node api security & mongoose aggregation', startDate: '2025-02-20', endDate: '2025-02-27', comments: 'focusing on atlas integration' },
   { id: '2', employeeId: '5', employeeName: 'khalid android', title: 'android developer', projectName: 'production portal', taskName: 'base design coding', startDate: '2025-02-20', endDate: '2025-03-05', comments: 'direct figma sync' }
 ];
 
@@ -52,9 +52,9 @@ const DEFAULT_PROJECT: Project = {
   allocations: INITIAL_ALLOCATIONS,
   credentials: [],
   stackInfo: {
-    framework: 'laravel 11',
-    database: 'self-hosted mongodb',
-    version: 'a21 v2.6-internal'
+    framework: 'express.js (node)',
+    database: 'mongodb atlas',
+    version: 'a21 v3.0-atlas'
   }
 };
 

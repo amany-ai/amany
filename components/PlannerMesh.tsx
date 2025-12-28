@@ -4,60 +4,41 @@ import {
   Briefcase, 
   RotateCcw,
   Clock, 
-  Slack, 
   ShieldCheck, 
-  ChevronRight, 
   AlertTriangle, 
   TrendingUp, 
-  Code, 
-  Zap, 
-  Cpu, 
   Layers, 
-  Activity,
   UserCheck,
-  Search,
-  CheckCircle,
-  FileText,
-  Terminal,
-  ArrowUpRight,
-  Database,
-  Hash
+  Zap, 
+  Users,
+  FileSpreadsheet
 } from 'lucide-react';
-import { PlannerSyncStatus, PlannerAllocation, AuditFinding, PortfolioHealth } from '../types';
+import { PlannerAllocation } from '../types';
+import { TEAM_MEMBERS } from '../constants'; // Simulating access to the central roster
 
 const PlannerMesh: React.FC = () => {
   const [activeSubTab, setActiveSubTab] = useState<'console' | 'blueprint'>('console');
   const [isSyncing, setIsSyncing] = useState(false);
-  const [approvedPlan, setApprovedPlan] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'fetching' | 'success'>('idle');
 
-  // Target Slack Configuration
-  const TARGET_SLACK_CHANNEL = "C0A5X58AEKB";
-  const ZOHO_WEBHOOK_ENDPOINT = "zpsrF3qTxKfnMFD4mGt2o0pyi5bYPvFEzsiDHx8YEFH4rqiV9BzzyUOoxn9RXFFL8ZxrATyf03AwR";
-
-  // Mock Data - Only Zoho for Planner Agent
-  const syncs: Record<string, PlannerSyncStatus> = {
-    zoho: { lastSync: 'Real-time (Atlas)', status: 'active', deltaCount: 142, mappingGaps: 0 }
-  };
-
-  const allocations: PlannerAllocation[] = [
-    { id: '1', memberId: '4', memberName: 'omar backend', hours: 38, project: 'production portal', priority: 'High', isOverCapacity: false },
-    { id: '2', memberId: '5', memberName: 'khalid android', hours: 42, project: 'native refresh', priority: 'High', isOverCapacity: true },
-    { id: '3', memberId: '7', memberName: 'sara qa', hours: 30, project: 'core node', priority: 'Medium', isOverCapacity: false },
-  ];
-
-  const auditFindings: AuditFinding[] = [
-    { id: 'a1', agent: 'Agent 6: Audit', severity: 'Warning', message: 'User "khalid android" is overcapacity in Zoho workload (42h/40h).', fixSteps: ['Move 2h to PM Queue', 'Re-assign support task'] },
-  ];
-
-  const portfolioHealth: PortfolioHealth[] = [
-    { pmName: 'PM-Node-01', score: 92, utilization: 88, missedDeadlines: 0, blockers: 1 },
-    { pmName: 'PM-Node-02', score: 74, utilization: 98, missedDeadlines: 2, blockers: 4 },
-  ];
+  // Logic to simulate getting the "latest" roster from HR Agent
+  const currentRoster = TEAM_MEMBERS;
 
   const triggerSync = () => {
     setIsSyncing(true);
-    setTimeout(() => setIsSyncing(false), 2000);
+    setSyncStatus('fetching');
+    setTimeout(() => {
+      setIsSyncing(false);
+      setSyncStatus('success');
+      setTimeout(() => setSyncStatus('idle'), 3000);
+    }, 1500);
   };
+
+  const allocations: PlannerAllocation[] = [
+    { id: '1', memberId: 'marwa-be', memberName: 'Marwa Mahmoud', hours: 38, project: 'backend architecture', priority: 'High', isOverCapacity: false },
+    { id: '2', memberId: 'hamza-fe', memberName: 'hamza talha', hours: 42, project: 'frontend refactor', priority: 'High', isOverCapacity: true },
+    { id: '3', memberId: 'nuha-am', memberName: 'Nuha Mekkawy', hours: 30, project: 'client coordination', priority: 'Medium', isOverCapacity: false },
+  ];
 
   return (
     <div className="p-8 max-w-7xl auto animate-in fade-in duration-500 font-inter lowercase-ui">
@@ -66,265 +47,116 @@ const PlannerMesh: React.FC = () => {
           <h2 className="text-3xl font-black text-slate-900 flex items-center gap-3 tracking-tighter lowercase">
             <Briefcase className="text-indigo-600" size={32} /> Planner Agent Mesh
           </h2>
-          <p className="text-slate-500 mt-1 font-medium italic lowercase generous-spacing">zoho projects workload orchestrator</p>
+          <p className="text-slate-500 mt-1 font-medium italic lowercase generous-spacing">وكيل تخطيط الموارد وسعة الفريق</p>
         </div>
-        <div className="flex bg-white border border-slate-200 p-1.5 rounded-2xl shadow-sm">
-          {(['console', 'blueprint'] as const).map(tab => (
-            <button 
-              key={tab}
-              onClick={() => setActiveSubTab(tab)}
-              className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                activeSubTab === tab ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-400 hover:text-slate-600'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={triggerSync}
+            disabled={isSyncing}
+            className={`flex items-center gap-2 px-8 py-3 rounded-2xl font-black text-[11px] lowercase tracking-wide shadow-xl transition-all ${
+              syncStatus === 'success' ? 'bg-emerald-500 text-white' : 'bg-slate-900 text-white hover:bg-indigo-600'
+            }`}
+          >
+            {isSyncing ? <RotateCcw className="animate-spin" size={14} /> : (syncStatus === 'success' ? <UserCheck size={14} /> : <Users size={14} />)}
+            {isSyncing ? 'fetching nodes...' : (syncStatus === 'success' ? 'mesh updated' : 'sync hr roster')}
+          </button>
+          
+          <div className="flex bg-white border border-slate-200 p-1.5 rounded-2xl shadow-sm">
+            {(['console', 'blueprint'] as const).map(tab => (
+              <button 
+                key={tab}
+                onClick={() => setActiveSubTab(tab)}
+                className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                  activeSubTab === tab ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 
       {activeSubTab === 'console' && (
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          {/* Node Pulse */}
-          <div className="xl:col-span-1 space-y-6">
-            <div className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm">
-              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-                <Activity size={14} className="text-indigo-500" /> Zoho Workload Vitality
-              </h4>
-              <div className="space-y-4">
-                {Object.entries(syncs).map(([key, sync]) => (
-                  <div key={key} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center group">
-                    <div>
-                      <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-1">{key}</p>
-                      <p className="text-[9px] text-slate-400 font-bold uppercase">Tasks Delta: +{sync.deltaCount} • {sync.lastSync}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                       <div className={`w-2 h-2 rounded-full ${isSyncing ? 'bg-indigo-500 animate-ping' : 'bg-emerald-500'}`}></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <button 
-                onClick={triggerSync}
-                className="w-full mt-6 bg-slate-900 text-white py-4 rounded-2xl font-black lowercase text-[11px] tracking-widest flex items-center justify-center gap-2 hover:bg-indigo-600 transition-all shadow-xl"
-              >
-                {isSyncing ? <RotateCcw className="animate-spin" size={14} /> : <Zap size={14} className="text-amber-400" />}
-                Sync Zoho Node
-              </button>
-            </div>
-
-            <div className="bg-slate-900 rounded-[32px] p-8 text-white shadow-xl relative overflow-hidden">
-               <div className="absolute top-0 right-0 p-8 opacity-10">
-                  <ShieldCheck size={100} className="text-indigo-500" />
-               </div>
-               <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-6 relative z-10">Agent G Workload Sentinel</h4>
-               <div className="space-y-4 relative z-10">
-                  {auditFindings.map(finding => (
-                    <div key={finding.id} className={`p-4 rounded-2xl border ${finding.severity === 'Critical' ? 'bg-red-500/10 border-red-500/30' : 'bg-white/5 border-white/10'}`}>
-                       <p className="text-[10px] font-black text-white uppercase tracking-tight mb-1">{finding.message}</p>
-                       <p className="text-[9px] text-slate-400 italic mb-3">Agent: {finding.agent}</p>
-                       <div className="flex flex-wrap gap-2">
-                          {finding.fixSteps.map((step, i) => (
-                            <span key={i} className="text-[8px] bg-white/10 px-2 py-1 rounded-lg font-bold lowercase italic">{step}</span>
-                          ))}
-                       </div>
-                    </div>
-                  ))}
-               </div>
-            </div>
-          </div>
-
-          {/* Allocation Handshake */}
           <div className="xl:col-span-2 space-y-8">
             <div className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm">
                <div className="flex justify-between items-center mb-8">
                   <div>
                     <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
-                       <Layers size={18} className="text-indigo-500" /> Weekly Task Allocation
+                       <Layers size={18} className="text-indigo-500" /> Resource Mapping Sub-Agent
                     </h4>
-                    <p className="text-[9px] text-slate-400 font-bold uppercase mt-1">Rule: 40h Capacity • 10% Support Reserve</p>
+                    <p className="text-[9px] text-slate-400 font-bold uppercase mt-1">Workload distribution synced with HR Identity node</p>
                   </div>
-                  {!approvedPlan && (
-                    <button 
-                      onClick={() => setApprovedPlan(true)}
-                      className="bg-emerald-600 text-white px-6 py-2 rounded-xl font-black text-[10px] lowercase shadow-xl hover:bg-emerald-700 transition-all"
-                    >
-                      Approve & Push to #{TARGET_SLACK_CHANNEL}
-                    </button>
-                  )}
-                  {approvedPlan && (
-                    <div className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase border border-emerald-100">
-                       <CheckCircle size={14} /> Plan Synced to {TARGET_SLACK_CHANNEL}
-                    </div>
-                  )}
                </div>
 
                <div className="space-y-4">
                   {allocations.map(alloc => (
                     <div key={alloc.id} className={`p-6 rounded-[24px] border transition-all ${alloc.isOverCapacity ? 'border-red-500/20 bg-red-50/30' : 'border-slate-100 bg-slate-50'}`}>
                        <div className="flex justify-between items-start mb-4">
-                          <div>
-                             <p className="text-sm font-black text-slate-900 lowercase">{alloc.memberName}</p>
-                             <p className="text-[9px] text-slate-400 font-bold uppercase mt-0.5">{alloc.project}</p>
+                          <div className="flex items-center gap-4">
+                             <div className="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-black">
+                               {alloc.memberName.charAt(0)}
+                             </div>
+                             <div>
+                                <p className="text-sm font-black text-slate-900 lowercase">{alloc.memberName}</p>
+                                <p className="text-[9px] text-slate-400 font-bold uppercase mt-0.5">{alloc.project}</p>
+                             </div>
                           </div>
                           <div className="text-right">
                              <p className={`text-xl font-black ${alloc.isOverCapacity ? 'text-red-600' : 'text-slate-900'}`}>{alloc.hours}h</p>
                              <p className="text-[8px] font-black text-slate-400 uppercase">of 40h capacity</p>
                           </div>
                        </div>
-                       <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full transition-all duration-1000 ${alloc.isOverCapacity ? 'bg-red-500' : 'bg-indigo-500'}`}
-                            style={{ width: `${Math.min((alloc.hours / 40) * 100, 100)}%` }}
-                          ></div>
-                       </div>
-                       {alloc.isOverCapacity && (
-                         <p className="text-[9px] text-red-600 font-black uppercase mt-3 flex items-center gap-1">
-                           <AlertTriangle size={10} /> Overcapacity Violation • Escalated to Agent G
-                         </p>
-                       )}
                     </div>
                   ))}
                </div>
             </div>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-               <div className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm">
-                  <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6 flex items-center gap-2">
-                     <TrendingUp size={16} className="text-emerald-500" /> Portfolio Health Node
-                  </h4>
-                  <div className="space-y-6">
-                     {portfolioHealth.map(health => (
-                        <div key={health.pmName} className="group">
-                           <div className="flex justify-between items-end mb-2">
-                              <div>
-                                 <p className="text-xs font-black text-slate-800 uppercase tracking-tighter">{health.pmName}</p>
-                                 <p className="text-[9px] text-slate-400 font-bold uppercase mt-0.5">Utilization: {health.utilization}%</p>
-                              </div>
-                              <span className={`text-lg font-black ${health.score > 80 ? 'text-emerald-600' : 'text-amber-600'}`}>{health.score}%</span>
-                           </div>
-                           <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
-                              <div className={`h-full ${health.score > 80 ? 'bg-emerald-500' : 'bg-amber-500'}`} style={{ width: `${health.score}%` }}></div>
-                           </div>
-                           <div className="mt-3 flex gap-4">
-                              <span className="text-[8px] font-black text-red-400 uppercase tracking-widest">Missed: {health.missedDeadlines}</span>
-                              <span className="text-[8px] font-black text-amber-400 uppercase tracking-widest">Blockers: {health.blockers}</span>
-                           </div>
-                        </div>
-                     ))}
-                  </div>
-               </div>
+          <div className="xl:col-span-1 space-y-6">
+             <div className="bg-slate-900 rounded-[32px] p-8 text-white shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-6 opacity-10">
+                   <Zap size={60} className="text-indigo-500" />
+                </div>
+                <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-6">Capacity Overview</h4>
+                <div className="space-y-4">
+                   <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
+                      <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Total Human Nodes</p>
+                      <p className="text-2xl font-black text-white">{currentRoster.length}</p>
+                      <p className="text-[8px] text-indigo-400 font-bold uppercase">Synced from HR Agent</p>
+                   </div>
+                   <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
+                      <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Mesh Vitality</p>
+                      <div className="flex items-center gap-2">
+                         <TrendingUp className="text-emerald-500" size={14} />
+                         <span className="text-xs font-black text-white">Optimal Utilization</span>
+                      </div>
+                   </div>
+                </div>
+             </div>
 
-               <div className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm flex flex-col">
-                  <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6 flex items-center gap-2">
-                     <Slack size={16} className="text-indigo-500" /> Slack Channel Sync
-                  </h4>
-                  <div className="flex-1 flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-slate-100 rounded-[24px]">
-                     <div className="relative">
-                        <Slack size={32} className="text-slate-200 mb-4" />
-                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white"></div>
-                     </div>
-                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Target Node:</p>
-                     <p className="text-xs font-black text-indigo-600 tracking-tighter flex items-center gap-1 mb-4">
-                        <Hash size={12} /> {TARGET_SLACK_CHANNEL}
-                     </p>
-                     <button className="mt-2 text-[10px] font-black text-indigo-600 uppercase border-b border-indigo-200 pb-0.5 hover:text-indigo-800 transition-colors">
-                       View Block Kit Preview
-                     </button>
-                  </div>
-               </div>
-            </div>
+             <div className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm">
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                   <AlertTriangle className="text-amber-500" size={14} /> Capacity Alerts Sub-Agent
+                </h4>
+                <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100">
+                   <p className="text-[10px] font-black text-amber-900 uppercase">High Load Node</p>
+                   <p className="text-[11px] text-amber-700 font-medium italic mt-1">Hamza Talha exceeds 40h production cap.</p>
+                </div>
+             </div>
           </div>
         </div>
       )}
 
       {activeSubTab === 'blueprint' && (
-        <div className="space-y-8 animate-in slide-in-from-right-4">
-           <div className="bg-white border border-slate-200 rounded-[32px] p-10 shadow-sm">
-              <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-10 flex items-center gap-2">
-                 <Terminal size={20} className="text-indigo-500" /> Implementation Blueprint (Node.js + Atlas)
-              </h4>
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
-                 <div className="space-y-6">
-                    <div>
-                       <h5 className="text-[11px] font-black text-indigo-600 uppercase tracking-[0.2em] mb-4">A. Mongoose Schemas (Atlas)</h5>
-                       <div className="bg-slate-950 p-6 rounded-[24px] border border-white/5 font-mono text-[11px] text-slate-300 overflow-x-auto h-[400px] custom-scrollbar">
-<pre className="text-indigo-300">{`// models/Task.js
-import mongoose from 'mongoose';
-
-const TaskSchema = new mongoose.Schema({
-    zoho_id: { type: String, unique: true },
-    title: String,
-    owner_id: String,
-    priority: { type: String, enum: ['High', 'Medium', 'Low'] },
-    planned_hours: Number,
-    sync_source: String,
-    due_date: Date
-}, { timestamps: true });
-
-export default mongoose.model('Task', TaskSchema);
-`}</pre>
-                       </div>
-                    </div>
-                 </div>
-
-                 <div className="space-y-6">
-                    <div>
-                       <h5 className="text-[11px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-4">B. Allocation Service Logic</h5>
-                       <div className="bg-slate-950 p-6 rounded-[24px] border border-white/5 font-mono text-[11px] text-slate-300 overflow-x-auto h-[400px] custom-scrollbar">
-<pre className="text-emerald-300">{`// services/plannerService.js
-import Task from '../models/Task.js';
-
-export const generateWeeklyPlan = async (userIds) => {
-    // Aggregation pipeline for Atlas
-    const plan = await Task.aggregate([
-        { $match: { owner_id: { $in: userIds }, status: 'OPEN' } },
-        { 
-            $group: { 
-                _id: "$owner_id", 
-                totalHours: { $sum: "$planned_hours" },
-                tasks: { $push: "$$ROOT" }
-            } 
-        }
-    ]);
-
-    return plan.map(p => ({
-        user_id: p._id,
-        total_hours: p.totalHours,
-        is_over_capacity: p.totalHours > 40,
-        tasks: p.tasks
-    }));
-};
-`}</pre>
-                       </div>
-                    </div>
-                 </div>
-              </div>
+        <div className="bg-white border border-slate-200 rounded-[40px] p-12 shadow-sm animate-in slide-in-from-right-4">
+           <div className="flex items-center gap-4 mb-10">
+              <Clock className="text-indigo-600" size={24} />
+              <h3 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">Resource Timeline Node</h3>
            </div>
-
-           <div className="bg-slate-900 rounded-[32px] p-10 text-white border border-indigo-900/30">
-              <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-10 flex items-center gap-2">
-                 <Cpu size={20} /> Sovereign Architecture (Node.js Atlas)
-              </h4>
-              <div className="bg-black/50 p-8 rounded-[24px] border border-white/5 font-mono text-[11px] text-indigo-300">
-<pre>{`{
-  "stack": "Node.js (Express) + MongoDB Atlas",
-  "auth": "JWT Protocol Node",
-  "webhooks": {
-    "zoho_endpoint": "${ZOHO_WEBHOOK_ENDPOINT}",
-    "persistence": "mongoose_upsert"
-  },
-  "slack_node": {
-    "target_channel": "C0A5X58AEKB",
-    "protocol": "Webhooks v2"
-  },
-  "laws": {
-    "capacity_hours": 40,
-    "support_reserve_pct": 0.10,
-    "db_driver": "mongoose"
-  }
-}`}</pre>
-              </div>
+           <div className="h-64 bg-slate-50 border border-slate-100 rounded-[32px] flex items-center justify-center text-slate-400 italic">
+              Timeline visualization node initializing...
            </div>
         </div>
       )}

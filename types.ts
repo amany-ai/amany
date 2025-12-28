@@ -262,12 +262,15 @@ export interface TeamMember {
   name: string;
   email: string;
   role: string;
+  // Added profile field to match Google Sheet
+  profile: string; 
   userRole: UserRole;
-  status: 'Active' | 'On Leave' | 'Offboarded';
+  status: 'Active' | 'On Leave' | 'Offboarded' | 'Inactive';
   projectType: 'Mobile' | 'Web' | 'Both';
   shiftStartTime: string;
   zohoId?: string;
   timeDoctorId?: string;
+  reportingManager?: string;
 }
 
 export interface Notification {

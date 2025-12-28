@@ -1,23 +1,86 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { EstimationResult, Project, ResourceAllocation, UIDesignResult, MethodologyOption } from "../types";
+import { EstimationResult, Project, ResourceAllocation, UIDesignResult, MethodologyOption, TeamMember } from "../types";
 
 const extractJson = (text: string | undefined) => {
   if (!text) return null;
+  const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
   try {
-    // Attempt direct parse first as we are using responseMimeType: 'application/json'
-    return JSON.parse(text.trim());
+    return JSON.parse(cleanText);
   } catch (e) {
-    // Fallback for wrapped responses
-    const firstBrace = text.indexOf('{');
-    const lastBrace = text.lastIndexOf('}');
-    if (firstBrace !== -1 && lastBrace !== -1) {
+    const firstBrace = cleanText.indexOf('{');
+    const lastBrace = cleanText.lastIndexOf('}');
+    const firstBracket = cleanText.indexOf('[');
+    const lastBracket = cleanText.lastIndexOf(']');
+
+    const start = (firstBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) ? firstBrace : firstBracket;
+    const end = (lastBrace !== -1 && (lastBracket === -1 || lastBrace > lastBracket)) ? lastBrace : lastBracket;
+
+    if (start !== -1 && end !== -1) {
       try {
-        return JSON.parse(text.substring(firstBrace, lastBrace + 1));
+        return JSON.parse(cleanText.substring(start, end + 1));
       } catch (inner) {
         return null;
       }
     }
+    return null;
+  }
+};
+
+/**
+ * AI Agent for HR Identity Governance
+ * Interprets natural language commands to manage the user roster
+ */
+export const manageHRIdentity = async (command: string, currentRoster: any[]) => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: `Current Roster: ${JSON.stringify(currentRoster)}. Command: ${command}`,
+      config: {
+        systemInstruction: `You are the HR Identity Agent. 
+        Your task is to interpret commands for adding, editing, or deleting users from the roster. 
+        The roster contains: name, email, role, job_title.
+        Return the updated roster in JSON format.
+        If the command is 'sync from google sheet', simulate the extraction of the 12 users based on the Google Sheet logic.
+        Sheet Columns: User Name, Email Address, Profile, Role, Status.
+        Logic: Status must be Active. Email is the key.`,
+        responseMimeType: 'application/json'
+      }
+    });
+    return extractJson(response.text);
+  } catch (e) {
+    console.error("HR Agent Logic Failed:", e);
+    return null;
+  }
+};
+
+/**
+ * AI Sub-Agent for HR Data Auditing
+ * Analyzes roster for inconsistencies.
+ */
+export const auditHRData = async (employees: TeamMember[]) => {
+  if (employees.length === 0) return null;
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: `Audit this employee roster: ${JSON.stringify(employees, null, 2)}`,
+      config: {
+        systemInstruction: `You are an HR Data Integrity Auditor. Analyze the provided JSON roster.
+        1. Check for inconsistencies like missing 'reportingManager' (except for one root/CEO).
+        2. Identify potential duplicate entries based on name or email.
+        3. Flag any unusual role titles that don't fit a standard corporate structure.
+        4. Verify that all manager emails in 'reportingManager' correspond to an actual employee's email.
+        Provide a summary and a list of warnings. Output a valid JSON object with keys:
+        - "summary": an object with keys "total", "uniqueRoles", "departments" (an array of roles).
+        - "warnings": an array of objects, where each object has "severity" ('High' or 'Medium') and "message" (a string describing the issue).`,
+        responseMimeType: 'application/json'
+      }
+    });
+    return extractJson(response.text);
+  } catch(e) {
+    console.error("Audit Agent Failed:", e);
     return null;
   }
 };
@@ -316,7 +379,7 @@ export const analyzeFigmaDesign = async (image?: string, link?: string): Promise
       contents: { parts },
       config: {
         systemInstruction: "Persona: UI/UX engineer. Provide Node.js API route suggestions and Swift view stubs in JSON.",
-        responseMimeType: 'application/json'
+        // Fix: Removed responseMimeType as it is not supported for nano banana series models (gemini-2.5-flash-image).
       }
     });
     return extractJson(response.text);

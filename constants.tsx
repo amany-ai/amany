@@ -1,4 +1,5 @@
 
+
 import { ProjectPhase, TaskStatus, UserRole, Task, Language, TeamMember } from './types';
 
 export const WORKFLOW_RULES = {
@@ -106,17 +107,34 @@ export const TRANSLATIONS: Record<Language, any> = {
 };
 
 export const TEAM_MEMBERS: TeamMember[] = [
-  { id: '1', name: 'amany', email: 'amany@rh.net.sa', role: 'admin', userRole: UserRole.ADMIN, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', zohoId: 'Z-001', timeDoctorId: 'TD-001' },
-  { id: '2', name: 'ahmed ba', email: 'ahmed@rh.net.sa', role: 'business analyst', userRole: UserRole.BA, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', zohoId: 'Z-002', timeDoctorId: 'TD-002' },
-  { id: '4', name: 'omar backend', email: 'omar@rh.net.sa', role: 'backend developer', userRole: UserRole.BE_DEV, status: 'Active', projectType: 'Web', shiftStartTime: '09:00', zohoId: 'Z-004', timeDoctorId: 'TD-004' },
-  { id: '5', name: 'khalid android', email: 'khalid@rh.net.sa', role: 'android developer', userRole: UserRole.ANDROID_DEV, status: 'Active', projectType: 'Mobile', shiftStartTime: '09:00', zohoId: 'Z-005', timeDoctorId: 'TD-005' },
-  { id: '7', name: 'sara qa', email: 'sara@rh.net.sa', role: 'quality assurance', userRole: UserRole.QA, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', zohoId: 'Z-002', timeDoctorId: 'TD-002' }
+  { id: '1', name: 'Ahmad Anwar', email: 'ahmed.anwar@rowaad.net', role: 'BA', profile: 'Business', userRole: UserRole.BA, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', reportingManager: 'amany@rh.net.sa' },
+  { id: '2', name: 'Ahmed Saleh', email: 'ahmed.saleh@rowaad.net', role: 'IOS', profile: 'Engineering', userRole: UserRole.IOS_DEV, status: 'Active', projectType: 'Mobile', shiftStartTime: '09:00', reportingManager: 'amany@rh.net.sa' },
+  { id: '3', name: 'ahmed zayed', email: 'ahmed.zaid@rowaad.net', role: 'BA', profile: 'Business', userRole: UserRole.BA, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', reportingManager: 'amany@rh.net.sa' },
+  { id: '4', name: 'Amany Youssef', email: 'amany@rh.net.sa', role: 'PM', profile: 'Management', userRole: UserRole.PROJECT_MANAGER, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', reportingManager: 'amany@rh.net.sa' },
+  { id: '5', name: 'anass atef', email: 'ceo@rh.net.sa', role: 'CEO', profile: 'Executive', userRole: UserRole.ADMIN, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', reportingManager: 'ceo@rh.net.sa' },
+  { id: '6', name: 'Aya Shoala', email: 'aya.shoala@rowaad.net', role: 'project coordinator', profile: 'Management', userRole: UserRole.PROJECT_MANAGER, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', reportingManager: 'amany@rh.net.sa' },
+  { id: '7', name: 'Eman Awad', email: 'eman.awd@rowaad.net', role: 'Frontend-React', profile: 'Engineering', userRole: UserRole.FE_DEV, status: 'Active', projectType: 'Web', shiftStartTime: '09:00', reportingManager: 'amany@rh.net.sa' },
+  { id: '8', name: 'Enas Magdy', email: 'enas.magdy@rowaad.net', role: 'Frontend', profile: 'Engineering', userRole: UserRole.FE_DEV, status: 'Active', projectType: 'Web', shiftStartTime: '09:00', reportingManager: 'aya.sayed@rowaad.net' },
+  { id: '9', name: 'gehad rezk', email: 'ge.rezk@rowaad.net', role: 'Frontend', profile: 'Engineering', userRole: UserRole.FE_DEV, status: 'Active', projectType: 'Web', shiftStartTime: '09:00', reportingManager: 'aya.sayed@rowaad.net' },
+  { id: '10', name: 'Hala ElDeeb', email: 'hala@rh.net.sa', role: 'Account Manager', profile: 'Client Success', userRole: UserRole.ACCOUNT_MANAGER, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', reportingManager: 'ceo@rh.net.sa' },
+  { id: '11', name: 'Hamada Badr', email: 'hamada@rh.net.sa', role: 'Server', profile: 'Engineering', userRole: UserRole.BE_DEV, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', reportingManager: 'ceo@rh.net.sa' },
+  { id: '12', name: 'hamza talha', email: 'hamza.talha@rowaad.net', role: 'Frontend-React', profile: 'Engineering', userRole: UserRole.FE_DEV, status: 'Active', projectType: 'Web', shiftStartTime: '09:00', reportingManager: 'amany@rh.net.sa' },
+  { id: '13', name: 'k.hasan', email: 'k.hasan@rowaad.net', role: 'Android', profile: 'Engineering', userRole: UserRole.ANDROID_DEV, status: 'Active', projectType: 'Mobile', shiftStartTime: '09:00', reportingManager: 'amany@rh.net.sa' },
+  { id: '14', name: 'Mahmoud Heshmat', email: 'm.heshmat@rowaad.net', role: 'IOS', profile: 'Engineering', userRole: UserRole.IOS_DEV, status: 'Active', projectType: 'Mobile', shiftStartTime: '09:00', reportingManager: 'amany@rh.net.sa' },
+  { id: '15', name: 'Marwa Mahmoud', email: 'marwa@rowaad.net', role: 'Backend', profile: 'Engineering', userRole: UserRole.BE_DEV, status: 'Active', projectType: 'Web', shiftStartTime: '09:00', reportingManager: 'amany@rh.net.sa' },
+  { id: '16', name: 'Moamen Ramadi', email: 'moaa@rh.net.sa', role: 'designer', profile: 'Design', userRole: UserRole.DESIGNER, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', reportingManager: 'amany@rh.net.sa' },
+  { id: '17', name: 'mohamed fayez', email: 'm.fayez@rowaad.net', role: 'Backend', profile: 'Engineering', userRole: UserRole.BE_DEV, status: 'Active', projectType: 'Web', shiftStartTime: '09:00', reportingManager: 'amany@rh.net.sa' },
+  { id: '18', name: 'Mohamed Saleh', email: 'mo.salah@rowaad.net', role: 'Frontend', profile: 'Engineering', userRole: UserRole.FE_DEV, status: 'Active', projectType: 'Web', shiftStartTime: '09:00', reportingManager: 'aya.sayed@rowaad.net' },
+  { id: '19', name: 'Mohamed Wessam', email: 'm.wessam@rowaad.net', role: 'Android', profile: 'Engineering', userRole: UserRole.ANDROID_DEV, status: 'Active', projectType: 'Mobile', shiftStartTime: '09:00', reportingManager: 'amany@rh.net.sa' },
+  { id: '20', name: 'Nuha Mekkawy', email: 'nuha@rowaad.net', role: 'Account Manager', profile: 'Client Success', userRole: UserRole.ACCOUNT_MANAGER, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', reportingManager: 'hala@rh.net.sa' },
+  { id: '21', name: 'radwa osama', email: 'ra.osama@rowaad.net', role: 'Frontend', profile: 'Engineering', userRole: UserRole.FE_DEV, status: 'Active', projectType: 'Web', shiftStartTime: '09:00', reportingManager: 'aya.sayed@rowaad.net' },
+  { id: '22', name: 'rana hesham', email: 'rana.hesham@rowaad.net', role: 'Account Manager', profile: 'Client Success', userRole: UserRole.ACCOUNT_MANAGER, status: 'Active', projectType: 'Both', shiftStartTime: '09:00', reportingManager: 'hala@rh.net.sa' }
 ];
 
 export const ZOHO_A21_TEMPLATE: Task[] = [
-  { id: 'A21-T26', zohoTaskId: 'A21-T26', title: 'ba & design stage - 5 days', ownerId: '1', status: TaskStatus.DONE, durationDays: 5, isDoDMet: true, priority: 'High', comments: [], dependencies: [], roleTarget: UserRole.PROJECT_MANAGER },
-  { id: 'A21-T27', zohoTaskId: 'A21-T27', title: 'gathering requirement', ownerId: '2', status: TaskStatus.DONE, durationDays: 1, isDoDMet: true, priority: 'High', comments: [], dependencies: ['A21-T26'], roleTarget: UserRole.BA },
-  { id: 'A21-T31', zohoTaskId: 'A21-T31', title: 'writing ba doc (srs)', ownerId: '2', status: TaskStatus.DONE, durationDays: 2, isDoDMet: true, priority: 'High', comments: [], dependencies: ['A21-T27'], roleTarget: UserRole.BA },
-  { id: 'A21-T2', zohoTaskId: 'A21-T2', title: 'backend api development', ownerId: '4', status: TaskStatus.OPEN, durationDays: 8, isDoDMet: false, priority: 'High', comments: [], dependencies: [], roleTarget: UserRole.BE_DEV },
-  { id: 'A21-T33', zohoTaskId: 'A21-T33', title: 'user acceptance testing (uat)', ownerId: '7', status: TaskStatus.OPEN, durationDays: 5, isDoDMet: false, priority: 'High', comments: [], dependencies: [], roleTarget: UserRole.QA },
+  { id: 'A21-T26', zohoTaskId: 'A21-T26', title: 'ba & design stage - 5 days', ownerId: '4', status: TaskStatus.DONE, durationDays: 5, isDoDMet: true, priority: 'High', comments: [], dependencies: [], roleTarget: UserRole.PROJECT_MANAGER },
+  { id: 'A21-T27', zohoTaskId: 'A21-T27', title: 'gathering requirement', ownerId: '1', status: TaskStatus.DONE, durationDays: 1, isDoDMet: true, priority: 'High', comments: [], dependencies: ['A21-T26'], roleTarget: UserRole.BA },
+  { id: 'A21-T31', zohoTaskId: 'A21-T31', title: 'writing ba doc (srs)', ownerId: '1', status: TaskStatus.DONE, durationDays: 2, isDoDMet: true, priority: 'High', comments: [], dependencies: ['A21-T27'], roleTarget: UserRole.BA },
+  { id: 'A21-T2', zohoTaskId: 'A21-T2', title: 'backend api development', ownerId: '15', status: TaskStatus.OPEN, durationDays: 8, isDoDMet: false, priority: 'High', comments: [], dependencies: [], roleTarget: UserRole.BE_DEV },
+  { id: 'A21-T33', zohoTaskId: 'A21-T33', title: 'user acceptance testing (uat)', ownerId: '4', status: TaskStatus.OPEN, durationDays: 5, isDoDMet: false, priority: 'High', comments: [], dependencies: [], roleTarget: UserRole.QA },
 ];

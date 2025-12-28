@@ -3,43 +3,47 @@ import React, { useState } from 'react';
 import { 
   Share2, RefreshCw, ExternalLink, ShieldCheck, Database, Key, 
   Settings, Terminal, CheckCircle2, AlertTriangle, Cpu, Globe,
-  Lock, ArrowRight, Code, Zap, Clock, Link as LinkIcon
+  Lock, ArrowRight, Code, Zap, Clock, Link as LinkIcon, Copy, Check, Server, Hash, Activity, Users
 } from 'lucide-react';
 import { NotificationSettings } from '../types';
 
+// Added interface for Integrations component props to fix type error in App.tsx
 interface IntegrationsProps {
   settings: NotificationSettings;
   onUpdateSettings: (settings: NotificationSettings) => void;
 }
 
-const Integrations: React.FC<IntegrationsProps> = () => {
-  const [syncingNode, setSyncingNode] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'status' | 'blueprint' | 'auth'>('status');
+const Integrations: React.FC<IntegrationsProps> = ({ settings, onUpdateSettings }) => {
+  const [activeTab, setActiveTab] = useState<'console' | 'auth' | 'blueprint'>('console');
+  const [copied, setCopied] = useState<string | null>(null);
 
-  const handleSync = (node: string) => {
-    setSyncingNode(node);
-    setTimeout(() => setSyncingNode(null), 3000);
+  const handleCopy = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(id);
+    setTimeout(() => setCopied(null), 2000);
   };
 
   const ZOHO_WEBHOOK_ID = "zpsrF3qTxKfnMFD4mGt2o0pyi5bYPvFEzsiDHx8YEFH4rqiV9BzzyUOoxn9RXFFL8ZxrATyf03AwR";
+  const SYSTEM_BASE_URL = "https://hub.rh.net.sa/api/v1";
 
-  const nodes = [
-    { id: 'zoho', name: 'Zoho Projects (Webhook)', status: 'Active', lastSync: 'Real-time', version: 'v3.0', color: 'emerald', detail: 'Webhook: Active' },
-    { id: 'td', name: 'Time Doctor', status: 'Active', lastSync: '12h ago', version: 'v1.1', color: 'blue', detail: 'REST Sync' },
-    { id: 'slack', name: 'Slack Bridge', status: 'Active', lastSync: 'Real-time', version: 'Webhooks', color: 'indigo', detail: 'C0A5X58AEKB' }
+  const apiEndpoints = [
+    { name: 'Zoho Webhook Receiver', url: `${SYSTEM_BASE_URL}/webhooks/zoho/${ZOHO_WEBHOOK_ID.substring(0, 8)}`, method: 'POST', target: 'Zoho Projects Settings' },
+    { name: 'Zoho User Sync Node', url: `${SYSTEM_BASE_URL}/sync/zoho/users`, method: 'GET', target: 'Internal PM Dashboard' },
+    { name: 'Time Doctor Auth Bridge', url: `${SYSTEM_BASE_URL}/auth/timedoctor/callback`, method: 'GET', target: 'TD Developer Portal' },
+    { name: 'Sovereign Resource Sync', url: `${SYSTEM_BASE_URL}/sync/resources`, method: 'GET', target: 'Internal Pulse' }
   ];
 
   return (
-    <div className="p-8 max-w-7xl auto animate-in fade-in duration-500 font-inter lowercase-ui">
+    <div className="p-8 max-w-7xl mx-auto animate-in fade-in duration-500 font-inter lowercase-ui">
       <header className="mb-10 flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-black text-slate-900 flex items-center gap-3 tracking-tighter lowercase">
-            <Share2 className="text-emerald-600" size={32} /> Integration Agent
+            <Share2 className="text-emerald-600" size={32} /> API Bridge Console
           </h2>
-          <p className="text-slate-500 mt-1 font-medium italic lowercase generous-spacing">Sovereign API Handshake Registry</p>
+          <p className="text-slate-500 mt-1 font-medium italic lowercase generous-spacing">إدارة روابط الربط مع الأنظمة الخارجية</p>
         </div>
         <div className="flex bg-white border border-slate-200 p-1 rounded-2xl shadow-sm">
-          {(['status', 'auth', 'blueprint'] as const).map(tab => (
+          {(['console', 'auth', 'blueprint'] as const).map(tab => (
             <button 
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -47,105 +51,59 @@ const Integrations: React.FC<IntegrationsProps> = () => {
                 activeTab === tab ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'
               }`}
             >
-              {tab}
+              {tab === 'console' ? 'Endpoints' : tab}
             </button>
           ))}
         </div>
       </header>
 
-      {activeTab === 'status' && (
+      {activeTab === 'console' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {nodes.map((node) => (
-                <div key={node.id} className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
-                  <div className="flex justify-between items-start mb-8">
-                    <div className={`w-12 h-12 bg-${node.color}-50 rounded-2xl flex items-center justify-center border border-${node.color}-100`}>
-                      <Database className={`text-${node.color}-500`} size={24} />
-                    </div>
-                    <div className="text-right">
-                       <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 lowercase">connected</span>
-                       <p className="text-[8px] text-slate-400 font-bold uppercase mt-1 tracking-widest">{node.version}</p>
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-black text-slate-900 mb-1 lowercase tracking-tight">{node.name}</h3>
-                  <p className="text-[10px] text-emerald-600 font-black uppercase tracking-widest mb-4 flex items-center gap-1">
-                    <LinkIcon size={12} /> {node.detail}
-                  </p>
-                  <div className="space-y-2 mb-8">
-                    <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                       <span>Heartbeat</span>
-                       <span className="text-slate-900">{node.lastSync}</span>
-                    </div>
-                    <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
-                       <div className={`h-full bg-${node.color}-500 w-[100%] animate-pulse`}></div>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <button 
-                      onClick={() => handleSync(node.id)}
-                      disabled={syncingNode === node.id}
-                      className="flex-1 py-3 bg-slate-900 text-white rounded-xl text-[10px] font-black lowercase flex items-center justify-center gap-2 hover:bg-black transition-all shadow-xl"
-                    >
-                      {syncingNode === node.id ? <RefreshCw className="animate-spin" size={14} /> : <Zap size={14} className="text-amber-400" />}
-                      Sync Delta
-                    </button>
-                    <button className="p-3 bg-slate-50 border border-slate-100 rounded-xl text-slate-400 hover:text-slate-900 transition-all">
-                      <Settings size={14} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="bg-slate-900 rounded-[40px] p-10 text-white shadow-2xl relative overflow-hidden">
-               <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
-                  <Cpu size={180} />
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white border border-slate-200 rounded-[32px] overflow-hidden shadow-sm">
+               <div className="p-8 border-b border-slate-100 flex justify-between items-center">
+                  <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                    <Globe size={16} className="text-emerald-500" /> Public API Endpoints
+                  </h3>
+                  <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">system online</span>
                </div>
-               <div className="relative z-10">
-                  <h4 className="text-emerald-400 text-[10px] font-black uppercase tracking-[0.3em] mb-4">Agent Logic Console</h4>
-                  <h3 className="text-3xl font-black tracking-tighter mb-8 lowercase">Node.js API Handshake Logic</h3>
-                  <div className="space-y-6">
-                     {[
-                       { rule: "Webhook Persistence", desc: "Zoho Webhook events are prioritized for real-time task mapping in the Mongoose layer." },
-                       { rule: "JWT Auth Node", desc: "Internal API calls require a Bearer token issued by the Node.js authentication node." },
-                       { rule: "MongoDB Atlas Node", desc: "Data is normalized and persisted to MongoDB Atlas clusters for distributed access." }
-                     ].map((logic, i) => (
-                       <div key={i} className="flex gap-6 items-start">
-                          <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0 text-emerald-400 font-black text-xs">{i+1}</div>
+               <div className="p-2">
+                  {apiEndpoints.map((endpoint, i) => (
+                    <div key={i} className="p-6 hover:bg-slate-50 transition-all rounded-[24px] border border-transparent hover:border-slate-100 group">
+                       <div className="flex justify-between items-start mb-4">
                           <div>
-                             <p className="text-sm font-black text-white lowercase tracking-tight">{logic.rule}</p>
-                             <p className="text-xs text-slate-400 font-medium italic leading-relaxed mt-1">{logic.desc}</p>
+                             <h4 className="text-sm font-black text-slate-900 lowercase">{endpoint.name}</h4>
+                             <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Target: {endpoint.target}</p>
                           </div>
+                          <span className={`px-3 py-1 rounded-lg text-[10px] font-black ${endpoint.method === 'POST' ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'}`}>
+                            {endpoint.method}
+                          </span>
                        </div>
-                     ))}
-                  </div>
+                       <div className="flex items-center gap-2 bg-slate-900 p-4 rounded-2xl relative overflow-hidden group">
+                          <code className="text-[10px] text-emerald-400 font-mono truncate flex-1">{endpoint.url}</code>
+                          <button 
+                            onClick={() => handleCopy(endpoint.url, `end-${i}`)}
+                            className="text-slate-500 hover:text-white transition-colors"
+                          >
+                            {copied === `end-${i}` ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                          </button>
+                       </div>
+                    </div>
+                  ))}
                </div>
             </div>
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-6">
              <div className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm">
                 <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-                   <AlertTriangle size={14} className="text-amber-500" /> Webhook Events
+                   <Users size={14} className="text-blue-500" /> Identity Heartbeat
                 </h4>
                 <div className="space-y-4">
-                   <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
-                      <p className="text-xs font-black text-emerald-900 lowercase">Event: Task_Created</p>
-                      <p className="text-[10px] text-emerald-700 italic mt-1">Source: Webhook Endpoint {ZOHO_WEBHOOK_ID.substring(0, 8)}...</p>
-                      <div className="mt-2 text-[9px] font-bold text-emerald-600 bg-white/50 px-2 py-1 rounded-lg">Mapped to Atlas in 12ms</div>
+                   <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                      <p className="text-xs font-black text-blue-900 lowercase">zoho user pool: synced</p>
+                      <p className="text-[10px] text-blue-700 italic mt-1">last pool sync: 2 minutes ago</p>
                    </div>
-                </div>
-             </div>
-
-             <div className="bg-emerald-600 rounded-[32px] p-8 text-white shadow-xl shadow-emerald-500/20">
-                <h4 className="text-[10px] font-black text-white/70 uppercase tracking-widest mb-4">Node Health</h4>
-                <div className="flex justify-between items-end">
-                   <p className="text-4xl font-black tracking-tighter">99.9%</p>
-                   <span className="text-[10px] font-bold uppercase mb-1">Atlas Connectivity</span>
-                </div>
-                <div className="mt-6 h-1 w-full bg-white/20 rounded-full">
-                   <div className="h-full bg-white w-[99.9%]"></div>
                 </div>
              </div>
           </div>
@@ -157,124 +115,26 @@ const Integrations: React.FC<IntegrationsProps> = () => {
           <div className="bg-white border border-slate-200 rounded-[32px] p-10 shadow-sm">
             <header className="flex justify-between items-end mb-10 border-b pb-8">
               <div>
-                <h3 className="text-2xl font-black text-slate-900 tracking-tighter lowercase">Agent 1: Node.js Webhook Handler</h3>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 tracking-widest">Express.js Handler for Event zpsrF3...</p>
-              </div>
-              <div className="flex gap-2">
-                <span className="bg-slate-100 text-slate-600 text-[10px] font-black px-4 py-1.5 rounded-full uppercase">node 20+</span>
-                <span className="bg-emerald-100 text-emerald-600 text-[10px] font-black px-4 py-1.5 rounded-full uppercase">mongoose</span>
+                <h3 className="text-2xl font-black text-slate-900 tracking-tighter lowercase">routes/api.php - User Sync Node</h3>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Laravel 11 Endpoint Definition</p>
               </div>
             </header>
+            <div className="bg-slate-950 p-8 rounded-[24px] font-mono text-xs text-emerald-500 overflow-x-auto">
+<pre>{`<?php
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-              <div className="space-y-6">
-                <h4 className="text-[11px] font-black text-indigo-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                   <Database size={16} /> A. Webhook Controller (Express)
-                </h4>
-                <div className="bg-slate-950 p-6 rounded-[24px] border border-white/5 font-mono text-[11px] text-slate-300 overflow-x-auto h-[450px] custom-scrollbar">
-<pre className="text-emerald-400">{`// controllers/zohoWebhook.js
-import Task from '../models/Task.js';
+use Illuminate\\Support\\Facades\\Route;
+use App\\Http\\Controllers\\Api\\ZohoSyncController;
 
-export const handleZohoWebhook = async (req, res) => {
-  const { task } = req.body;
-  
-  try {
-    // Mongoose Real-time Persistence to Atlas
-    const updatedTask = await Task.findOneAndUpdate(
-      { zoho_id: task.id },
-      { 
-        title: task.name,
-        owner_email: task.owner,
-        status: task.status_node,
-        sync_source: 'webhook_atlas'
-      },
-      { upsert: true, new: true }
-    );
+Route::prefix('v1')->group(function () {
+    
+    // Manual/Scheduled User Pool Sync
+    Route::get('/sync/zoho/users', [ZohoSyncController::class, 'syncUsers'])
+         ->name('api.zoho.users.sync');
 
-    res.status(200).json({ status: 'acknowledged', id: updatedTask._id });
-  } catch (err) {
-    res.status(500).json({ error: 'atlas_write_fail' });
-  }
-};
+});
 `}</pre>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <h4 className="text-[11px] font-black text-blue-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                   <Clock size={16} /> B. Data Mapping Service
-                </h4>
-                <div className="bg-slate-950 p-6 rounded-[24px] border border-white/5 font-mono text-[11px] text-slate-300 overflow-x-auto h-[450px] custom-scrollbar">
-<pre className="text-blue-300">{`// services/mappingAgent.js
-import axios from 'axios';
-
-export const processZohoEvent = async (payload) => {
-  // 1. Audit Log to Atlas
-  await AuditLog.create({
-    event: 'zoho_webhook',
-    payload,
-    timestamp: new Date()
-  });
-
-  // 2. Dispatch Workload Analysis
-  if (payload.action === 'task_assigned') {
-    await analyzeWorkload(payload.task.owner);
-  }
-
-  // 3. Notify Slack C0A5X58AEKB
-  await axios.post(process.env.SLACK_WEBHOOK, {
-    channel: 'C0A5X58AEKB',
-    text: \`node: \${payload.task.name} initialized\`
-  });
-};
-`}</pre>
-                </div>
-              </div>
             </div>
           </div>
-        </div>
-      )}
-
-      {activeTab === 'auth' && (
-        <div className="bg-white border border-slate-200 rounded-[40px] p-12 shadow-sm animate-in zoom-in-95">
-           <div className="max-w-2xl mx-auto text-center">
-              <div className="w-20 h-20 bg-slate-900 rounded-[32px] flex items-center justify-center text-white mx-auto mb-8 shadow-2xl">
-                 <Lock size={32} />
-              </div>
-              <h3 className="text-3xl font-black text-slate-900 tracking-tighter mb-4 lowercase">Sovereign Auth Node</h3>
-              <p className="text-slate-400 font-medium italic mb-12 lowercase">Managing Webhook Tokens and Atlas Clusters.</p>
-              
-              <div className="space-y-4 text-left">
-                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Zoho Webhook Token</label>
-                    <div className="relative group">
-                       <LinkIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-emerald-500" size={16} />
-                       <input 
-                         type="text" 
-                         defaultValue={ZOHO_WEBHOOK_ID}
-                         readOnly
-                         className="w-full bg-slate-50 border border-slate-100 rounded-3xl pl-14 pr-6 py-5 outline-none font-mono text-xs text-slate-500"
-                       />
-                    </div>
-                 </div>
-                 {['MongoDB Atlas Connection URI', 'JWT Secret Key', 'Slack Webhook URL'].map((field) => (
-                    <div key={field} className="space-y-2">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">{field}</label>
-                       <div className="relative group">
-                          <Key className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors" size={16} />
-                          <input 
-                            type="password" 
-                            defaultValue="••••••••••••••••••••"
-                            className="w-full bg-slate-50 border border-slate-100 rounded-3xl pl-14 pr-6 py-5 outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-sm"
-                          />
-                       </div>
-                    </div>
-                 ))}
-                 <button className="w-full mt-8 bg-black text-white py-6 rounded-[32px] font-black text-xs uppercase tracking-[0.2em] shadow-2xl hover:bg-emerald-600 transition-all flex items-center justify-center gap-3">
-                    Update Production Config <ArrowRight size={18} />
-                 </button>
-              </div>
-           </div>
         </div>
       )}
     </div>

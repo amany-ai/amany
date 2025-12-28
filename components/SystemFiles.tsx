@@ -1,77 +1,63 @@
 
 import React, { useState } from 'react';
-import { FileCode, Database, Layout, Lock, Copy, Check, Terminal, Folder, File as FileIcon, ChevronRight, ChevronDown, Download, Link as LinkIcon } from 'lucide-react';
+import { FileCode, Database, Layout, Lock, Copy, Check, Terminal, Folder, File as FileIcon, ChevronRight, ChevronDown, Download, Link as LinkIcon, HardDrive, Code, Server, Users } from 'lucide-react';
 import { Language } from '../types';
 import { TRANSLATIONS } from '../constants';
 
-interface SystemFilesProps {
-  language: Language;
-}
+interface SystemFilesProps { language: Language; }
 
 const SystemFiles: React.FC<SystemFilesProps> = ({ language }) => {
-  const [activeView, setActiveView] = useState<'env' | 'backend' | 'frontend'>('env');
+  const [activeView, setActiveView] = useState<'env' | 'backend' | 'storage' | 'api' | 'users'>('env');
   const [copied, setCopied] = useState<string | null>(null);
   const t = TRANSLATIONS[language];
 
-  const ENV_BACKEND = `
-# ROWAAD SOVEREIGN OS - NODE.JS BACKEND CONFIG
-PORT=8080
-NODE_ENV=production
-JWT_SECRET=${btoa(Math.random().toString()).substring(0, 32)}
+  const ZOHO_USER_SERVICE = `
+<?php
 
-# MONGODB ATLAS NODE (CLOUD)
-MONGODB_URI="mongodb+srv://admin:<password>@cluster0.atlas.mongodb.net/rowaad_prod"
+namespace App\\Services;
 
-# EXTERNAL SYSTEM API LINKS
-ZOHO_API_URL=https://projectsapi.zoho.com/restapi/portal/rhnetsa
-SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
-TIME_DOCTOR_URL=https://api2.timedoctor.com/v1.1
+use Illuminate\\Support\\Facades\\Http;
+use App\\Models\\TeamMember;
+use Illuminate\\Support\\Facades\\Log;
 
-# INTEGRATION CREDENTIALS
-ZOHO_WEBHOOK_TOKEN=zpsrF3qTxKfnMFD4mGt2o0pyi5bYPvFEzsiDHx8YEFH4rqiV9BzzyUOoxn9RXFFL8ZxrATyf03AwR
-TIME_DOCTOR_KEY=td_key_...
+class ZohoUserService
+{
+    /**
+     * Agent H: Identity Node Sync
+     * Fetch all users from Zoho Projects Portal
+     */
+    public function syncAllFromZoho()
+    {
+        $token = $this->getValidToken(); // Your OAuth logic
+        $portalId = config('services.zoho.portal_id');
 
-# AI ENGINE CONFIGURATION (GEMINI)
-API_KEY=your_gemini_api_key_here
-  `.trim();
+        $response = Http::withToken($token)
+            ->get("https://projectsapi.zoho.com/api/v1/portal/{$portalId}/users/");
 
-  const ENV_FRONTEND = `
-# ROWAAD SOVEREIGN OS - REACT FRONTEND CONFIG
-VITE_API_URL=http://api.node.local
-VITE_SYSTEM_VERSION=A21-v3.0-atlas
-VITE_NODE_ID=NODE-ATLAS-001
-  `.trim();
+        if (!$response->successful()) {
+            Log::error("Zoho User Sync Failed: " . $response->body());
+            return false;
+        }
 
-  const NODE_MONGO_CONFIG = `
-// config/database.js
-import mongoose from 'mongoose';
+        $users = $response->json()['users'] ?? [];
 
-const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
-    console.log(\`Atlas Connected: \${conn.connection.host}\`);
-  } catch (error) {
-    console.error(\`Atlas Error: \${error.message}\`);
-    process.exit(1);
-  }
-};
+        foreach ($users as $user) {
+            TeamMember::updateOrCreate(
+                ['zoho_id' => $user['id']],
+                [
+                    'name' => $user['name'],
+                    'email' => $user['email'],
+                    'role_label' => $user['role_name'],
+                    'avatar_url' => $user['user_image_url'] ?? null,
+                    'is_active' => $user['status'] === 'active',
+                    'last_sync' => now()
+                ]
+            );
+        }
 
-export default connectDB;
-  `.trim();
-
-  const FRONTEND_GEMINI_SERVICE = `
-import { GoogleGenAI } from "@google/genai";
-
-// Frontend Service Implementation utilizing the Gemini SDK
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
-export const analyzeSRS = async (content: string) => {
-  const response = await ai.models.generateContent({
-    model: 'gemini-3-pro-preview',
-    contents: content,
-  });
-  return response.text;
-};
+        return true;
+    }
+}
   `.trim();
 
   const handleCopy = (text: string, id: string) => {
@@ -80,213 +66,72 @@ export const analyzeSRS = async (content: string) => {
     setTimeout(() => setCopied(null), 2000);
   };
 
-  const handleDownload = (content: string, filename: string) => {
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
-
   return (
-    <div className="p-8 max-w-7xl auto animate-in fade-in duration-500">
+    <div className="p-8 max-w-7xl mx-auto animate-in fade-in duration-500">
       <header className="mb-10 flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-black text-slate-900 flex items-center gap-4 tracking-tighter uppercase">
             <FileCode size={32} className="text-emerald-500" /> {t.system_files}
           </h2>
-          <p className="text-slate-500 mt-1 font-medium">Internal technical repository for Sovereign OS stack.</p>
+          <p className="text-slate-500 mt-1 font-medium italic lowercase">repository for sovereign api nodes.</p>
         </div>
         <div className="flex bg-white border border-slate-200 p-1.5 rounded-2xl shadow-sm">
           <button 
             onClick={() => setActiveView('env')}
-            className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${
-              activeView === 'env' ? 'bg-black text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'
-            }`}
+            className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeView === 'env' ? 'bg-black text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
           >
-            <Lock size={14} /> .env
+            .env
           </button>
           <button 
-            onClick={() => setActiveView('backend')}
-            className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${
-              activeView === 'backend' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-400 hover:text-slate-600'
-            }`}
+            onClick={() => setActiveView('users')}
+            className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeView === 'users' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-400 hover:text-slate-600'}`}
           >
-            <Database size={14} /> Backend
+            User Sync
           </button>
           <button 
-            onClick={() => setActiveView('frontend')}
-            className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${
-              activeView === 'frontend' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-400 hover:text-slate-600'
-            }`}
+            onClick={() => setActiveView('api')}
+            className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeView === 'api' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
           >
-            <Layout size={14} /> Frontend
+            API Bridge
           </button>
         </div>
       </header>
 
+      {activeView === 'users' && (
+        <div className="space-y-8 animate-in slide-in-from-bottom-4">
+           <div className="bg-white border border-slate-200 rounded-[40px] p-10 shadow-sm">
+              <header className="flex justify-between items-end mb-10 border-b pb-8">
+                 <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center">
+                       <Users size={24} />
+                    </div>
+                    <div>
+                       <h3 className="text-2xl font-black text-slate-900 tracking-tighter uppercase">ZohoUserService.php</h3>
+                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Laravel 11 Identity Sync Node</p>
+                    </div>
+                 </div>
+                 <button 
+                   onClick={() => handleCopy(ZOHO_USER_SERVICE, 'user-service-code')}
+                   className="px-6 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase flex items-center gap-2"
+                 >
+                    {copied === 'user-service-code' ? <Check size={14} /> : <Copy size={14} />} {copied === 'user-service-code' ? 'Copied' : 'Copy Code'}
+                 </button>
+              </header>
+              <div className="bg-slate-950 p-8 rounded-[32px] font-mono text-[11px] text-blue-400 overflow-x-auto h-[600px] custom-scrollbar shadow-2xl">
+                 <pre>{ZOHO_USER_SERVICE}</pre>
+              </div>
+           </div>
+        </div>
+      )}
+
       {activeView === 'env' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in slide-in-from-bottom-4 duration-500">
-          <div className="space-y-6">
-            <div className="bg-white border border-slate-200 rounded-[32px] overflow-hidden shadow-sm">
-               <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                  <div className="flex items-center gap-3">
-                     <div className="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center">
-                        <Database size={16} />
-                     </div>
-                     <span className="text-[11px] font-black text-slate-800 uppercase tracking-widest">.env (Backend)</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={() => handleDownload(ENV_BACKEND, 'backend.env')}
-                      className="p-2 text-slate-400 hover:text-emerald-500 transition-colors"
-                    >
-                      <Download size={16} />
-                    </button>
-                    <button 
-                      onClick={() => handleCopy(ENV_BACKEND, 'be-env')}
-                      className="p-2 text-slate-400 hover:text-emerald-500 transition-colors"
-                    >
-                      {copied === 'be-env' ? <Check size={16} /> : <Copy size={16} />}
-                    </button>
-                  </div>
-               </div>
-               <div className="p-8 bg-black text-emerald-500 font-mono text-[11px] leading-relaxed overflow-x-auto min-h-[350px]">
-                  <pre>{ENV_BACKEND}</pre>
-               </div>
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <div className="bg-white border border-slate-200 rounded-[32px] overflow-hidden shadow-sm">
-               <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                  <div className="flex items-center gap-3">
-                     <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
-                        <Layout size={16} />
-                     </div>
-                     <span className="text-[11px] font-black text-slate-800 uppercase tracking-widest">.env (Frontend)</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={() => handleDownload(ENV_FRONTEND, 'frontend.env')}
-                      className="p-2 text-slate-400 hover:text-blue-500 transition-colors"
-                    >
-                      <Download size={16} />
-                    </button>
-                    <button 
-                      onClick={() => handleCopy(ENV_FRONTEND, 'fe-env')}
-                      className="p-2 text-slate-400 hover:text-blue-500 transition-colors"
-                    >
-                      {copied === 'fe-env' ? <Check size={16} /> : <Copy size={16} />}
-                    </button>
-                  </div>
-               </div>
-               <div className="p-8 bg-black text-blue-400 font-mono text-[11px] leading-relaxed overflow-x-auto min-h-[350px]">
-                  <pre>{ENV_FRONTEND}</pre>
-               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {activeView === 'backend' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in slide-in-from-bottom-4 duration-500">
-           <div className="lg:col-span-1 bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm h-fit">
-              <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-6 flex items-center gap-2">
-                <Folder size={14} className="text-emerald-500" /> Node.js Atlas Structure
-              </h3>
-              <div className="space-y-3">
-                 <div className="flex items-center gap-2 text-sm text-slate-600 font-bold hover:text-emerald-600 cursor-pointer">
-                    <Folder size={16} /> src/
-                 </div>
-                 <div className="flex items-center gap-2 text-sm text-slate-400 font-bold ml-6">
-                    <Folder size={16} /> controllers/
-                 </div>
-                 <div className="flex items-center gap-2 text-sm text-slate-400 font-bold ml-6">
-                    <Folder size={16} /> models/ (Mongoose)
-                 </div>
-                 <div className="flex items-center gap-2 text-sm text-slate-600 font-bold hover:text-emerald-600 cursor-pointer">
-                    <Folder size={16} /> config/
-                 </div>
-                 <div className="flex items-center gap-2 text-sm text-emerald-600 font-black ml-6">
-                    <FileIcon size={16} /> database.js
-                 </div>
-                 <div className="flex items-center gap-2 text-sm text-slate-600 font-bold hover:text-emerald-600 cursor-pointer">
-                    <Folder size={16} /> routes/
-                 </div>
-                 <div className="flex items-center gap-2 text-sm text-emerald-600 font-black ml-6">
-                    <FileIcon size={16} /> api.js
-                 </div>
-                 <div className="flex items-center gap-2 text-sm text-slate-600 font-bold hover:text-emerald-600 cursor-pointer">
-                    <FileIcon size={16} /> server.js
-                 </div>
-              </div>
-           </div>
-
-           <div className="lg:col-span-2 space-y-6">
-              <div className="bg-black rounded-[32px] overflow-hidden shadow-2xl border border-emerald-900/30">
-                 <div className="p-6 border-b border-emerald-900/30 bg-emerald-950/20 flex justify-between items-center">
-                    <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">config/database.js</span>
-                    <button 
-                      onClick={() => handleCopy(NODE_MONGO_CONFIG, 'be-db')}
-                      className="p-2 text-slate-400 hover:text-emerald-500"
-                    >
-                      {copied === 'be-db' ? <Check size={14} /> : <Copy size={14} />}
-                    </button>
-                 </div>
-                 <div className="p-8 text-slate-300 font-mono text-[11px] leading-relaxed overflow-x-auto h-[400px] custom-scrollbar">
-                    <pre>{NODE_MONGO_CONFIG}</pre>
-                 </div>
-              </div>
-           </div>
-        </div>
-      )}
-
-      {activeView === 'frontend' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in slide-in-from-bottom-4 duration-500">
-           <div className="lg:col-span-1 bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm h-fit">
-              <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-6 flex items-center gap-2">
-                <Folder size={14} className="text-blue-500" /> React ESM Structure
-              </h3>
-              <div className="space-y-3">
-                 <div className="flex items-center gap-2 text-sm text-slate-600 font-bold">
-                    <Folder size={16} /> components/
-                 </div>
-                 <div className="flex items-center gap-2 text-sm text-slate-600 font-bold">
-                    <Folder size={16} /> services/
-                 </div>
-                 <div className="flex items-center gap-2 text-sm text-blue-600 font-black ml-6">
-                    <FileIcon size={16} /> geminiService.ts
-                 </div>
-                 <div className="flex items-center gap-2 text-sm text-slate-600 font-bold">
-                    <FileIcon size={16} /> index.tsx
-                 </div>
-                 <div className="flex items-center gap-2 text-sm text-slate-600 font-bold">
-                    <FileIcon size={16} /> App.tsx
-                 </div>
-              </div>
-           </div>
-
-           <div className="lg:col-span-2 space-y-6">
-              <div className="bg-slate-900 rounded-[32px] overflow-hidden shadow-2xl border border-blue-900/30">
-                 <div className="p-6 border-b border-blue-900/30 bg-blue-950/20 flex justify-between items-center">
-                    <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">services/geminiService.ts</span>
-                    <button 
-                      onClick={() => handleCopy(FRONTEND_GEMINI_SERVICE, 'fe-ai')}
-                      className="p-2 text-slate-400 hover:text-blue-500"
-                    >
-                      {copied === 'fe-ai' ? <Check size={14} /> : <Copy size={14} />}
-                    </button>
-                 </div>
-                 <div className="p-8 text-slate-300 font-mono text-[11px] leading-relaxed overflow-x-auto h-[400px] custom-scrollbar">
-                    <pre>{FRONTEND_GEMINI_SERVICE}</pre>
-                 </div>
-              </div>
-           </div>
+        <div className="bg-black rounded-[40px] p-12 text-emerald-500 font-mono text-xs animate-in fade-in">
+           <pre>{`
+# ZOHO CONFIG
+ZOHO_PORTAL_ID=72491XXXX
+ZOHO_CLIENT_ID=1000.XXXXX
+ZOHO_CLIENT_SECRET=XXXXXX
+           `}</pre>
         </div>
       )}
     </div>

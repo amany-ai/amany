@@ -12,6 +12,7 @@ import ResourcePlanner from './components/ResourcePlanner';
 import EmployeeManagement from './components/EmployeeManagement';
 import AIAssistant from './components/AIAssistant';
 import PlannerMesh from './components/PlannerMesh';
+import SystemMap from './components/SystemMap';
 import Login from './components/Login';
 import { ZOHO_A21_TEMPLATE, TRANSLATIONS } from './constants';
 import { ShieldCheck, Command } from 'lucide-react';
@@ -127,6 +128,7 @@ const AppContent: React.FC = () => {
         />
       );
       case 'policy': return <PolicyCenter />;
+      case 'system-map': return <SystemMap />;
       default: return <Dashboard project={project} language="en" />;
     }
   };

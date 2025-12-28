@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Project, Language, GitLabUpdate } from '../types';
 import { getProjectHealthInsights } from '../services/geminiService';
 import ActivitySentinel from './ActivitySentinel';
-import { TrendingUp, AlertTriangle, Activity, Zap, Server, Database, Smartphone, GitBranch } from 'lucide-react';
+import { TrendingUp, AlertTriangle, Activity, Zap, Server, Database, Smartphone, GitBranch, HardDrive, ShieldCheck } from 'lucide-react';
 import { TRANSLATIONS } from '../constants';
 
 interface DashboardProps {
@@ -83,13 +83,13 @@ const Dashboard: React.FC<DashboardProps> = ({ project, language }) => {
 
           <div className="bg-white border border-slate-100 rounded-[40px] p-10 shadow-sm transition-all hover:shadow-md">
             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-3 generous-spacing">
-              <Zap className="text-emerald-500" size={14} /> stack vitality
+              <Zap className="text-emerald-500" size={14} /> node vitality
             </h3>
             <div className="space-y-5">
               {[
                 { label: 'laravel node', icon: <Server size={14}/> },
-                { label: 'mongodb node', icon: <Database size={14}/> },
-                { label: 'native node', icon: <Smartphone size={14}/> }
+                { label: 'atlas storage', icon: <HardDrive size={14}/> },
+                { label: 'mongodb node', icon: <Database size={14}/> }
               ].map(stack => (
                 <div key={stack.label} className="flex justify-between items-center">
                   <span className="text-[11px] font-bold text-slate-600 tracking-tighter flex items-center gap-3 generous-spacing">
@@ -107,48 +107,44 @@ const Dashboard: React.FC<DashboardProps> = ({ project, language }) => {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-100 rounded-[50px] p-12 shadow-sm mb-12">
-        <div className="flex justify-between items-center mb-10">
+      <div className="bg-slate-900 border border-slate-800 rounded-[50px] p-12 shadow-2xl mb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+           <HardDrive size={180} className="text-emerald-500" />
+        </div>
+        <div className="relative z-10 flex justify-between items-center mb-10">
           <div>
-            <h3 className="text-2xl font-black text-slate-900 tracking-tighter flex items-center gap-4 generous-spacing">
-              <GitBranch className="text-slate-900" size={24} /> sync agent: gitlab
+            <h3 className="text-2xl font-black text-white tracking-tighter flex items-center gap-4 generous-spacing">
+              <HardDrive className="text-emerald-500" size={24} /> file storage bridge: zoho / td
             </h3>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2 generous-spacing">direct node commits</p>
+            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-2 generous-spacing">artisan storage node monitoring</p>
           </div>
-          <div className="flex items-center gap-4 bg-slate-50 px-6 py-3 rounded-2xl border border-slate-100">
-            <div className={`w-2 h-2 rounded-full ${isSyncing ? 'bg-emerald-500 animate-ping' : 'bg-slate-300'}`}></div>
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest generous-spacing">
-              {isSyncing ? 'syncing...' : 'active'}
-            </span>
+          <div className="bg-white/5 border border-white/10 px-6 py-2 rounded-2xl flex items-center gap-4">
+             <div className="text-right">
+                <p className="text-[9px] font-black text-slate-500 uppercase">storage used</p>
+                <p className="text-xs font-black text-white">42.8 gb / 512 gb</p>
+             </div>
+             <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                <ShieldCheck size={20} className="text-emerald-500" />
+             </div>
           </div>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {(project.gitUpdates || []).map((log: GitLabUpdate) => (
-            <div key={log.id} className="bg-slate-50/50 hover:bg-white border border-transparent hover:border-slate-200 p-8 rounded-[40px] transition-all group shadow-sm">
-              <div className="flex justify-between items-start mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-2xl bg-slate-900 flex items-center justify-center text-white font-black text-xs">
-                    {log.author.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="text-xs font-black text-slate-900 tracking-tight generous-spacing">{log.author}</p>
-                    <p className="text-[9px] text-slate-400 font-bold uppercase generous-spacing">{log.timestamp}</p>
-                  </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+           {[
+             { name: 'zoho_brd_final.pdf', source: 'zoho api', size: '2.4mb', status: 'secured' },
+             { name: 'td_screenshot_14.png', source: 'time doctor', size: '890kb', status: 'audited' },
+             { name: 'srs_v2_node.docx', source: 'internal', size: '1.1mb', status: 'secured' },
+             { name: 'mada_gateway.p12', source: 'zoho webhook', size: '12kb', status: 'encrypted' }
+           ].map((file, i) => (
+             <div key={i} className="bg-white/5 border border-white/10 p-6 rounded-3xl hover:bg-white/10 transition-all cursor-pointer group">
+                <HardDrive size={18} className="text-emerald-500 mb-4 group-hover:scale-110 transition-transform" />
+                <p className="text-xs font-black text-white truncate mb-1">{file.name}</p>
+                <div className="flex justify-between items-center">
+                   <span className="text-[9px] font-bold text-slate-500 uppercase">{file.source}</span>
+                   <span className="text-[9px] font-black text-emerald-400 uppercase bg-emerald-500/10 px-2 py-0.5 rounded-md">{file.status}</span>
                 </div>
-              </div>
-              <div className="mb-6">
-                <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-2 generous-spacing">{log.repo}</p>
-                <p className="text-sm font-bold text-slate-700 leading-relaxed line-clamp-2 generous-spacing">
-                  {log.message}
-                </p>
-              </div>
-              <div className="flex items-center gap-6 pt-6 border-t border-slate-100">
-                <span className="text-[10px] font-black text-emerald-600">+{log.linesAdded}</span>
-                <span className="text-[10px] font-black text-slate-300">-{log.linesRemoved}</span>
-              </div>
-            </div>
-          ))}
+             </div>
+           ))}
         </div>
       </div>
     </div>

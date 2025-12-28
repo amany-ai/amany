@@ -1,133 +1,180 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 import { EstimationResult, Project, ResourceAllocation, UIDesignResult, MethodologyOption } from "../types";
-import { ROWAD_ESTIMATION_RULES } from "../constants";
 
 const extractJson = (text: string | undefined) => {
   if (!text) return null;
   try {
+    // Attempt direct parse first as we are using responseMimeType: 'application/json'
     return JSON.parse(text.trim());
   } catch (e) {
+    // Fallback for wrapped responses
     const firstBrace = text.indexOf('{');
     const lastBrace = text.lastIndexOf('}');
-    const firstBracket = text.indexOf('[');
-    const lastBracket = text.lastIndexOf(']');
-    let jsonStr = '';
-    
     if (firstBrace !== -1 && lastBrace !== -1) {
-      if (firstBracket === -1 || (firstBrace < firstBracket && lastBrace > lastBracket)) {
-        jsonStr = text.substring(firstBrace, lastBrace + 1);
-      } else if (firstBracket !== -1 && lastBracket !== -1) {
-        jsonStr = text.substring(firstBracket, lastBracket + 1);
+      try {
+        return JSON.parse(text.substring(firstBrace, lastBrace + 1));
+      } catch (inner) {
+        return null;
       }
-    } else if (firstBracket !== -1 && lastBracket !== -1) {
-      jsonStr = text.substring(firstBracket, lastBracket + 1);
     }
-    
-    if (!jsonStr) return null;
-    try {
-      return JSON.parse(jsonStr);
-    } catch (innerE) {
-      return null;
-    }
+    return null;
   }
 };
 
 /**
- * AGENT 1: ZOHO SYNC PROMPT (NODE.JS ALIGNED + ATLAS PERSISTENCE)
+ * Helper to convert local file objects to Gemini inlineData parts
  */
-export const buildZohoSyncPrompt = (rawApiResponse: any) => {
-  return `
-    PURPOSE: Transform raw Zoho Projects JSON/Webhook data into Sovereign Node.js-ready schema.
-    STACK: Node.js (Express) + MongoDB Atlas (Mongoose).
-    ENDPOINT: zpsrF3qTxKfnMFD4mGt2o0pyi5bYPvFEzsiDHx8YEFH4rqiV9BzzyUOoxn9RXFFL8ZxrATyf03AwR
-    INPUT SCHEMA: Zoho Webhook Payload or REST API Output.
-    OUTPUT SCHEMA: 
-    {
-      "sync_status": "success",
-      "delta_counts": { "new_tasks": number, "updated_tasks": number },
-      "tasks": [
-        { "id": string, "name": string, "owner_email": string, "status": "OPEN"|"DONE" }
-      ]
+const filesToParts = (files: any[]) => {
+  return files.map(file => {
+    if (file.url && file.url.includes('base64,')) {
+      return {
+        inlineData: {
+          mimeType: file.type || 'image/png',
+          data: file.url.split('base64,')[1]
+        }
+      };
     }
-    RULES:
-    1. Extract task ID for Mongoose findOneAndUpdate upsert.
-    2. Normalize all data for Node.js ES6+ compatibility.
-    3. Prioritize webhook data as real-time source of truth for Atlas.
-  `;
+    return { text: `File Content (${file.name}): ${file.url}` };
+  });
 };
 
-/**
- * AGENT 2: TIME DOCTOR SYNC PROMPT (HR COMPLIANCE)
- */
-export const buildTimeDoctorSyncPrompt = (timeEntries: any) => {
-  return `
-    PURPOSE: Aggregate Time Doctor logs for HR Compliance monitoring via Node.js backend.
-    INPUT SCHEMA: Time Doctor entries list.
-    OUTPUT SCHEMA:
-    {
-      "compliance_summary": [
-         { "email": string, "total_hours": float, "idle_percentage": float, "violations": string[] }
-      ],
-      "identity_handshake": { "gaps": number, "orphan_emails": string[] }
-    }
-    RULES:
-    1. Flag idle percentages above 25% for HR Agent review.
-  `;
+export const runInitialScan = async (input: string, files: any[] = []): Promise<{ scope: any, methodology_options: MethodologyOption[] } | null> => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  
+  const fileParts = filesToParts(files);
+  const contents = { 
+    parts: [
+      { text: `Analyze these requirements for a Node.js/Atlas project: ${input}` },
+      ...fileParts
+    ] 
+  };
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents,
+      config: { 
+        systemInstruction: "You are Agent A (Scope Extractor). Extract the technical scope and suggest 3 methodology options. Output valid JSON.",
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            scope: {
+              type: Type.OBJECT,
+              properties: {
+                project_name: { type: Type.STRING },
+                domain: { type: Type.STRING },
+                platforms: { type: Type.ARRAY, items: { type: Type.STRING } },
+                core_modules: { type: Type.ARRAY, items: { type: Type.STRING } },
+                complexity: { type: Type.STRING, enum: ['Low', 'Medium', 'High'] }
+              },
+              required: ['project_name', 'complexity']
+            },
+            methodology_options: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  type: { type: Type.STRING },
+                  justification: { type: Type.STRING },
+                  pros: { type: Type.STRING },
+                  cons: { type: Type.STRING }
+                }
+              }
+            }
+          },
+          required: ['scope', 'methodology_options']
+        }
+      }
+    });
+    return extractJson(response.text);
+  } catch (e) { 
+    console.error("Initial Scan Failed:", e);
+    return null; 
+  }
 };
 
-/**
- * PLANNER MESH AGENTS
- */
+export const runFullSynthesis = async (params: any): Promise<EstimationResult | null> => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  
+  const fileParts = filesToParts(params.files || []);
+  const contents = { 
+    parts: [
+      { text: `Synthesize full estimation for ${params.scope.project_name} using ${params.methodology} methodology. Base input: ${params.input}` },
+      ...fileParts
+    ] 
+  };
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-pro-preview',
+      contents,
+      config: { 
+        systemInstruction: "Rowaad Estimator Orchestrator. Stack: Node.js/PostgreSQL/Atlas. Use 22-day rules for effort. Output valid JSON matching the EstimationResult schema.",
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            scope: { type: Type.OBJECT, properties: { complexity: { type: Type.STRING }, project_name: { type: Type.STRING } } },
+            effort_days: {
+              type: Type.OBJECT,
+              properties: {
+                backend: { type: Type.NUMBER },
+                dashboard: { type: Type.NUMBER },
+                website: { type: Type.NUMBER },
+                android: { type: Type.NUMBER },
+                ios: { type: Type.NUMBER },
+                qa: { type: Type.NUMBER },
+                deployment: { type: Type.NUMBER },
+                integrations: { type: Type.NUMBER }
+              }
+            },
+            duration_working_days: { type: Type.NUMBER },
+            team: { type: Type.OBJECT, properties: { BA: { type: Type.NUMBER }, Backend: { type: Type.NUMBER }, Frontend: { type: Type.NUMBER }, Android: { type: Type.NUMBER }, iOS: { type: Type.NUMBER }, QA: { type: Type.NUMBER }, PM: { type: Type.NUMBER } } },
+            rates_monthly: { type: Type.OBJECT },
+            budget: {
+              type: Type.OBJECT,
+              properties: {
+                monthly_cost: { type: Type.NUMBER },
+                project_cost: { type: Type.NUMBER },
+                vat_amount: { type: Type.NUMBER },
+                total_with_vat: { type: Type.NUMBER }
+              }
+            },
+            integrations: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { vendor: { type: Type.STRING }, effort_days: { type: Type.NUMBER }, complexity: { type: Type.STRING } } } },
+            validation: {
+              type: Type.OBJECT,
+              properties: {
+                status: { type: Type.STRING, enum: ['pass', 'fail'] },
+                issues: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { rule: { type: Type.STRING }, impact: { type: Type.STRING }, fix_steps: { type: Type.ARRAY, items: { type: Type.STRING } } } } }
+              }
+            },
+            assumptions: { type: Type.ARRAY, items: { type: Type.STRING } },
+            export_plan: { type: Type.OBJECT, properties: { code_snippet: { type: Type.STRING } } },
+            human_summary: { type: Type.STRING }
+          },
+          required: ['effort_days', 'duration_working_days', 'budget', 'validation']
+        }
+      }
+    });
+    return extractJson(response.text);
+  } catch (e) { 
+    console.error("Synthesis Failed:", e);
+    return null; 
+  }
+};
 
 export const runAgent1ZohoSync = async (zohoData: any) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const systemInstruction = buildZohoSyncPrompt(zohoData);
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: JSON.stringify(zohoData),
-      config: { systemInstruction, responseMimeType: 'application/json' }
-    });
-    return extractJson(response.text);
-  } catch (e) { return null; }
-};
-
-export const runAgent3WeeklyPlanner = async (context: { tasks: any[], capacity: number }) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const systemInstruction = `
-    You are Agent 3 (Weekly Resource Planner). 
-    STACK: Node.js Backend + MongoDB Atlas (Mongoose).
-    LAWS:
-    1. Focus EXCLUSIVELY on Zoho Projects workload data via Atlas.
-    2. Max capacity = 40h/week per resource node.
-    3. Reserve 10% for support.
-    4. Prioritize tasks due in < 14 days.
-    OUTPUT: JSON { allocations: array, overcapacity: array, risk_flags: array }
-  `;
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
-      contents: JSON.stringify(context),
-      config: { systemInstruction, responseMimeType: 'application/json' }
-    });
-    return extractJson(response.text);
-  } catch (e) { return null; }
-};
-
-export const runAgent6Audit = async (outputs: any) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const systemInstruction = `
-    You are Agent 6 (Audit & Review). 
-    TASK: Validate consistency across Node.js sync and Atlas database nodes.
-    LAWS: No unassigned high-priority tasks, no math errors in cost nodes.
-    OUTPUT: JSON { audit_status: "pass"|"fail", violations: array, fixes: array }
-  `;
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: JSON.stringify(outputs),
-      config: { systemInstruction, responseMimeType: 'application/json' }
+      config: { 
+        systemInstruction: "Transform Zoho data to Node.js/Atlas schema. Output JSON.",
+        responseMimeType: 'application/json'
+      }
     });
     return extractJson(response.text);
   } catch (e) { return null; }
@@ -140,47 +187,12 @@ export const getProjectHealthInsights = async (project: Project): Promise<any> =
       model: 'gemini-3-flash-preview',
       contents: JSON.stringify(project),
       config: { 
-        systemInstruction: "persona: workflow health agent. focus on zoho progress nodes via Node.js API (Atlas cloud integration). output: { \"statusSummary\": string, \"alerts\": string[] } in JSON.",
+        systemInstruction: "Persona: workflow health agent. Focus on Node.js/Atlas nodes. output: { \"statusSummary\": string, \"alerts\": string[] } in JSON.",
         responseMimeType: 'application/json'
       }
     });
     return extractJson(response.text);
   } catch (e) { return { statusSummary: "monitoring idle", alerts: [] }; }
-};
-
-export const runInitialScan = async (input: string, files: any[] = []): Promise<{ scope: any, methodology_options: MethodologyOption[] } | null> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const systemInstruction = `
-    You are Agent A (Scope Extractor) and Agent B (Methodology Selector).
-    Context: Node.js (Express) + MongoDB Atlas production stack.
-    Output JSON only.
-  `;
-  const parts = [{ text: input }];
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
-      contents: { parts },
-      config: { systemInstruction, responseMimeType: 'application/json' }
-    });
-    return extractJson(response.text);
-  } catch (e) { return null; }
-};
-
-export const runFullSynthesis = async (params: any): Promise<EstimationResult | null> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const systemInstruction = `
-    You are the Rowaad Estimator Mesh Orchestrator. 
-    Design estimations specifically for a Node.js / Express / MongoDB Atlas architecture.
-    Output JSON only.
-  `;
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
-      contents: JSON.stringify(params),
-      config: { systemInstruction, responseMimeType: 'application/json' }
-    });
-    return extractJson(response.text);
-  } catch (e) { return null; }
 };
 
 export const processCommandAgent = async (input: string) => {
@@ -198,7 +210,7 @@ export const processCommandAgent = async (input: string) => {
       model: 'gemini-3-flash-preview',
       contents: input,
       config: {
-        systemInstruction: "you are the command orchestrator agent for the Node.js ecosystem (Atlas cluster enabled).",
+        systemInstruction: "You are the command orchestrator for a Node.js/Atlas internal project management hub.",
         tools: [{ functionDeclarations: [navigateFunction] }]
       }
     });
@@ -224,7 +236,7 @@ export const analyzeSRS = async (content: string): Promise<any> => {
       model: 'gemini-3-flash-preview',
       contents: content,
       config: { 
-        systemInstruction: "persona: senior technical auditor agent. Analyze against Node.js (Express) best practices and MongoDB Atlas indexing. output JSON.",
+        systemInstruction: "Persona: senior technical auditor. Analyze against Node.js/Atlas standards. Output JSON.",
         responseMimeType: 'application/json'
       }
     });
@@ -239,7 +251,7 @@ export const generateTestSuite = async (srs: string): Promise<any[]> => {
       model: 'gemini-3-flash-preview',
       contents: srs,
       config: {
-        systemInstruction: "persona: QA automation engineer. focus on Node.js API and Native mobile flows. output JSON array.",
+        systemInstruction: "Persona: QA automation engineer. focus on Node.js API and Native mobile. output JSON array.",
         responseMimeType: 'application/json'
       }
     });
@@ -254,43 +266,12 @@ export const generateApiBlueprint = async (requirement: string): Promise<any> =>
       model: 'gemini-3-flash-preview',
       contents: requirement,
       config: {
-        systemInstruction: "persona: backend architect. generate Node.js (Express) controllers with Mongoose syntax for Atlas. output JSON.",
+        systemInstruction: "Persona: backend architect. generate Node.js/Express controllers and Mongoose schemas for Atlas. output JSON.",
         responseMimeType: 'application/json'
       }
     });
     return extractJson(response.text);
   } catch (e) { return null; }
-};
-
-export const analyzeFigmaDesign = async (image?: string, link?: string): Promise<any> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const parts: any[] = [{ text: `Analyze this Figma design for a Node.js/Swift ecosystem. ${link || ''}` }];
-  if (image) {
-    parts.push({ inlineData: { mimeType: 'image/png', data: image.split(',')[1] || image } });
-  }
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
-      contents: { parts },
-      config: {
-        systemInstruction: "persona: UI/UX engineer. Provide Node.js API route suggestions and Swift view stubs in JSON.",
-        responseMimeType: 'application/json'
-      }
-    });
-    return extractJson(response.text);
-  } catch (e) { return null; }
-};
-
-export const generateWeeklyResourceSummary = async (allocations: any[]): Promise<string> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: JSON.stringify(allocations),
-      config: { systemInstruction: "summarize this resource plan for the week based on zoho workload via Node.js Atlas node." }
-    });
-    return response.text || "";
-  } catch (e) { return ""; }
 };
 
 export const generateFrontendBlueprint = async (requirement: string): Promise<any> => {
@@ -300,7 +281,7 @@ export const generateFrontendBlueprint = async (requirement: string): Promise<an
       model: 'gemini-3-flash-preview',
       contents: requirement,
       config: {
-        systemInstruction: "persona: frontend lead. generate components and Tailwind stubs for a Node-served API node. output JSON.",
+        systemInstruction: "Persona: frontend lead. generate components and Tailwind stubs for a Node-served API. output JSON.",
         responseMimeType: 'application/json'
       }
     });
@@ -315,10 +296,41 @@ export const generateUIDesign = async (prompt: string): Promise<UIDesignResult |
       model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
-        systemInstruction: "persona: master UI designer. generate design specs for the Inter-based Sovereign OS. output JSON.",
+        systemInstruction: "Persona: master UI designer. generate design specs for the Inter-based Sovereign OS. output JSON.",
         responseMimeType: 'application/json'
       }
     });
     return extractJson(response.text);
   } catch (e) { return null; }
+};
+
+export const analyzeFigmaDesign = async (image?: string, link?: string): Promise<any> => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const parts: any[] = [{ text: `Analyze this Figma design for a Node.js/Atlas ecosystem. ${link || ''}` }];
+  if (image) {
+    parts.push({ inlineData: { mimeType: 'image/png', data: image.split(',')[1] || image } });
+  }
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-image',
+      contents: { parts },
+      config: {
+        systemInstruction: "Persona: UI/UX engineer. Provide Node.js API route suggestions and Swift view stubs in JSON.",
+        responseMimeType: 'application/json'
+      }
+    });
+    return extractJson(response.text);
+  } catch (e) { return null; }
+};
+
+export const generateWeeklyResourceSummary = async (allocations: any[]): Promise<string> => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: JSON.stringify(allocations),
+      config: { systemInstruction: "Summarize resource plan for Node.js/Atlas workload." }
+    });
+    return response.text || "";
+  } catch (e) { return ""; }
 };

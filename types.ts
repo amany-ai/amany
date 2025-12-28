@@ -32,6 +32,27 @@ export enum UserRole {
   ACCOUNT_MANAGER = 'Account Manager'
 }
 
+// Storage & File System Types
+export interface StorageNode {
+  id: string;
+  name: string;
+  type: 'Local' | 'S3' | 'GridFS';
+  status: 'online' | 'offline';
+  usagePercentage: number;
+  totalSize: string;
+}
+
+export interface SystemFile {
+  id: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  source: 'zoho' | 'timedoctor' | 'internal';
+  externalId?: string;
+  storagePath: string;
+  createdAt: string;
+}
+
 export interface FileAttachment {
   id: string;
   name: string;
